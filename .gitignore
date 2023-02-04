@@ -84,3 +84,4 @@ loader/linux/Makefile
 
 # Windows Loader
 loader/windows/x64/
+.vs/
