@@ -67,7 +67,7 @@ namespace loader
         0x2a,
         0x4d,
         0xcb,
-        0x44);
+        0x45);
 
     /// @brief defines IOCTL for starting a VM
     constexpr bsl::safe_umx START_VMM{static_cast<bsl::uintmx>(
