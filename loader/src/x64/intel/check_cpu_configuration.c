@@ -85,6 +85,31 @@
 /** @brief defines the VME CR4 field */
 #define CR4_VMXE (((uint64_t)1) << ((uint64_t)13))
 
+/** @brief defines the MSR_VMX_EPT_VPID_CAP MSR  */
+#define MSR_VMX_EPT_VPID_CAP ((uint32_t)0x0000048C)
+
+/** @brief defines the EPT_VPID_CAP_SUPPORT_PAGE_WALK_LENGTH4 MSR field */
+#define EPT_VPID_CAP_SUPPORT_PAGE_WALK_LENGTH4 (((uint64_t)1) << ((uint64_t)6))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_WRITE_BACK_MEMORY_TYPE MSR field */
+#define EPT_VPID_CAP_SUPPORT_WRITE_BACK_MEMORY_TYPE (((uint64_t)1) << ((uint64_t)14))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_INVEPT MSR field */
+#define EPT_VPID_CAP_SUPPORT_INVEPT (((uint64_t)1) << ((uint64_t)20))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_INVEPT MSR field */
+#define EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_INVEPT (((uint64_t)1) << ((uint64_t)25))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVEPT MSR field */
+#define EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVEPT (((uint64_t)1) << ((uint64_t)26))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_INVVPID MSR field */
+#define EPT_VPID_CAP_SUPPORT_INVVPID (((uint64_t)1) << ((uint64_t)32))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_INDIVIDUAL_ADDRESS_INVVPID MSR field */
+#define EPT_VPID_CAP_SUPPORT_INDIVIDUAL_ADDRESS_INVVPID (((uint64_t)1) << ((uint64_t)40))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_INVVPID MSR field */
+#define EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_INVVPID (((uint64_t)1) << ((uint64_t)41))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVVPID MSR field */
+#define EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVVPID (((uint64_t)1) << ((uint64_t)42))
+/** @brief defines the EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_RETAINING_GLOBALS_INVVPID MSR field */
+#define EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_RETAINING_GLOBALS_INVVPID                              \
+    (((uint64_t)1) << ((uint64_t)43))
+
 /**
  * <!-- description -->
  *   @brief Check we're running on an Intel processor.
@@ -311,6 +336,72 @@ check_for_xsave(void) NOEXCEPT
 
 /**
  * <!-- description -->
+ *   @brief Check if the cpu supports EPT.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, LOADER_FAILURE otherwise.
+ */
+NODISCARD static inline int64_t
+check_for_ept(void) NOEXCEPT
+{
+    uint64_t msr = intrinsic_rdmsr(MSR_VMX_EPT_VPID_CAP);
+    bfdebug_x64("checking for EPT", msr);
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_PAGE_WALK_LENGTH4) == ((uint64_t)0)) {
+        bferror_x64("EPT not support page-walk length of 4", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_WRITE_BACK_MEMORY_TYPE) == ((uint64_t)0)) {
+        bferror_x64("EPT not support write back type", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_INVEPT) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invept", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_INVEPT) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invept single context", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVEPT) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invept all context", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_INVVPID) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invvpid", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_INDIVIDUAL_ADDRESS_INVVPID) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invvpid individual address", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_INVVPID) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invvpid single context", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVVPID) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invvpid all context", msr);
+        return LOADER_FAILURE;
+    }
+
+    if ((msr & EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_RETAINING_GLOBALS_INVVPID) == ((uint64_t)0)) {
+        bferror_x64("EPT not support invvpid single context retaining globals", msr);
+        return LOADER_FAILURE;
+    }
+
+    return LOADER_SUCCESS;
+}
+
+/**
+ * <!-- description -->
  *   @brief This function checks to see if the CPU is supported as well as
  *     it's system configuration.
  *
@@ -357,6 +448,12 @@ check_cpu_configuration(void) NOEXCEPT
 
     if (check_for_xsave()) {
         bferror("check_for_xsave failed");
+        return LOADER_FAILURE;
+    }
+
+    // add by tangxuyao
+    if (check_for_ept()) {
+        bferror("check_for_ept failed");
         return LOADER_FAILURE;
     }
 
