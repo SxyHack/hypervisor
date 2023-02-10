@@ -29,6 +29,7 @@
 #include <bf_syscall_t.hpp>
 #include <gs_t.hpp>
 #include <intrinsic_t.hpp>
+#include <ept_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/discard.hpp>

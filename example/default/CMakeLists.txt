@@ -148,6 +148,8 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/tls_initialize.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/tls_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vs_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/mtrr_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/ept_t.hpp
         )
     endif()
 endif()
