@@ -134,6 +134,11 @@ namespace example
 
                 case loader::CPUID_COMMAND_ECX_REPORT_ON.get(): {
 
+                    constexpr auto dump_vsid{0x1F_u16};
+                    if (vsid == dump_vsid) {
+                        syscall::bf_debug_op_dump_vs(vsid);
+                    }
+
                     /// NOTE:
                     /// - Report that the root OS is now in a VM for this
                     ///   specific PP.
@@ -145,6 +150,8 @@ namespace example
                                  << bsl::cyn << bsl::hex(mut_sys.bf_tls_vmid())    // --
                                  << bsl::rst << " on pp "                          // --
                                  << bsl::cyn << bsl::hex(mut_sys.bf_tls_ppid())    // --
+                                 << bsl::rst << " on ps "                          // --
+                                 << bsl::cyn << bsl::hex(vsid)                     // --
                                  << bsl::rst << bsl::endl;                         // --
 
                     mut_sys.bf_tls_set_rax(loader::CPUID_COMMAND_RAX_SUCCESS);

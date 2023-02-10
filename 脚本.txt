@@ -1,0 +1,3 @@
+cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DBSL_DEBUG_LEVEL=bsl::V
+
+cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE

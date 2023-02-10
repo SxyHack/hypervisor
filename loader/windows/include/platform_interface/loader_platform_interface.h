@@ -56,7 +56,7 @@ DEFINE_GUID(
     0x2a,
     0x4d,
     0xcb,
-    0x45);
+    0x46);
 
 /** @brief defines IOCTL for starting a VM */
 #define LOADER_START_VMM                                                                           \

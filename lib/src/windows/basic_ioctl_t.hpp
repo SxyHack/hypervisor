@@ -40,14 +40,14 @@
 
 // clang-format on
 
-#include <bsl/exchange.hpp>
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
+#include <bsl/exchange.hpp>
+#include <bsl/finally.hpp>
 #include <bsl/move.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/swap.hpp>
 #include <bsl/unlikely.hpp>
-#include <bsl/convert.hpp>
-#include <bsl/finally.hpp>
 
 namespace lib
 {
@@ -98,7 +98,8 @@ namespace lib
 
             ret = SetupDiEnumDeviceInfo(info, 0, &dev_info);
             if (bsl::unlikely(ret == FALSE)) {
-                bsl::error() << "SetupDiEnumDeviceInfo failed\n";
+                bsl::error() << "SetupDiEnumDeviceInfo failed: " << bsl::uint32{GetLastError()}
+                             << bsl::endl;
                 return;
             }
 

@@ -57,6 +57,7 @@ void
 platform_expects(int const test) NOEXCEPT
 {
     NT_ASSERT(test);
+    UNREFERENCED_PARAMETER(test);
 }
 
 /**
@@ -74,6 +75,7 @@ void
 platform_ensures(int const test) NOEXCEPT
 {
     NT_ASSERT(test);
+    UNREFERENCED_PARAMETER(test);
 }
 
 /**
