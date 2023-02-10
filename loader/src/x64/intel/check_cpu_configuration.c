@@ -451,7 +451,6 @@ check_cpu_configuration(void) NOEXCEPT
         return LOADER_FAILURE;
     }
 
-    // add by tangxuyao
     if (check_for_ept()) {
         bferror("check_for_ept failed");
         return LOADER_FAILURE;
