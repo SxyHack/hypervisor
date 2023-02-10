@@ -46,7 +46,6 @@ if(HYPERVISOR_BUILD_LOADER AND NOT HYPERVISOR_TARGET_ARCH STREQUAL "aarch64")
             COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/windows MSBuild.exe /p:Configuration=Debug /p:Platform=x64 /p:Arch=${HYPERVISOR_TARGET_ARCH} /p:CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
             VERBATIM
         )
-        message(${HYPERVISOR_TARGET_ARCH})
         add_custom_target(driver_build_rel
             COMMAND ${CMAKE_COMMAND} -E chdir ${hypervisor_SOURCE_DIR}/loader/windows MSBuild.exe /p:Configuration=Release /p:Platform=x64 /p:Arch=${HYPERVISOR_TARGET_ARCH} /p:CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
             VERBATIM
