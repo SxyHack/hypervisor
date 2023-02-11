@@ -34,6 +34,8 @@ Environment:
 #pragma alloc_text(INIT, DriverEntry)
 #pragma alloc_text(PAGE, loaderEvtDeviceAdd)
 #pragma alloc_text(PAGE, loaderEvtDriverContextCleanup)
+#pragma alloc_text(PAGE, loaderEvtDriverUnload)
+
 #endif
 
 NTSTATUS
@@ -67,6 +69,8 @@ Return Value:
     WDF_DRIVER_CONFIG config;
     NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attributes;
+    WDFDRIVER Driver;
+    PWDFDEVICE_INIT WdfDeviceInit = NULL;
 
     //
     // Initialize WPP Tracing
@@ -82,12 +86,40 @@ Return Value:
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
     attributes.EvtCleanupCallback = loaderEvtDriverContextCleanup;
 
-    WDF_DRIVER_CONFIG_INIT(&config, loaderEvtDeviceAdd);
+    // this is a non-pnp driver
+    WDF_DRIVER_CONFIG_INIT(&config, WDF_NO_EVENT_CALLBACK);
 
-    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
+    //
+    // Tell the framework that this is non-pnp driver so that it doesn't
+    // set the default AddDevice routine.
+    //
+    config.DriverInitFlags |= WdfDriverInitNonPnpDriver;
+    //
+    // NonPnp driver must explicitly register an unload routine for
+    // the driver to be unloaded.
+    //
+    config.EvtDriverUnload = loaderEvtDriverUnload;
+
+    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, &Driver);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
+        WPP_CLEANUP(DriverObject);
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "WdfDriverCreate Success. After Add Device");
+
+    //
+    //
+    // In order to create a control device, we first need to allocate a
+    // WDFDEVICE_INIT structure and set all properties.
+    //
+    WdfDeviceInit = WdfControlDeviceInitAllocate(Driver, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RW_RES_R);
+
+    if (WdfDeviceInit == NULL) {
+        status = STATUS_INSUFFICIENT_RESOURCES;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfControlDeviceInitAllocate failed %!STATUS!", status);
         WPP_CLEANUP(DriverObject);
         return status;
     }
@@ -135,8 +167,7 @@ Return Value:
     serial_init();
 
     if (loader_init()) {
-        TraceEvents(
-            TRACE_LEVEL_ERROR, TRACE_DRIVER, "loader_init failed %!STATUS!", STATUS_UNSUCCESSFUL);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "loader_init failed %!STATUS!", STATUS_UNSUCCESSFUL);
         return STATUS_UNSUCCESSFUL;
     }
 
@@ -173,4 +204,31 @@ Return Value:
     // Stop WPP Tracing
     //
     WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
+}
+
+VOID
+loaderEvtDriverUnload(_In_ WDFDRIVER Driver)
+/*++
+Routine Description:
+
+   Called by the I/O subsystem just before unloading the driver.
+   You can free the resources created in the DriverEntry either
+   in this routine or in the EvtDriverContextCleanup callback.
+
+Arguments:
+
+    Driver - Handle to a framework driver object created in DriverEntry
+
+Return Value:
+
+    NTSTATUS
+
+--*/
+{
+    UNREFERENCED_PARAMETER(Driver);
+
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_INIT, "Entered loaderEvtDriverUnload\n");
+    // ...
 }

@@ -24,6 +24,7 @@ Environment:
 #include <initguid.h>
 #include <ntddk.h>
 #include <wdf.h>
+#include <wdmsec.h> // for SDDLs
 
 #include "device.h"
 #include "queue.h"
@@ -40,5 +41,6 @@ EXTERN_C_START
 DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD loaderEvtDeviceAdd;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP loaderEvtDriverContextCleanup;
+EVT_WDF_DRIVER_UNLOAD loaderEvtDriverUnload;
 
 EXTERN_C_END
