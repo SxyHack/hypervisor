@@ -85,3 +85,5 @@ loader/linux/Makefile
 # Windows Loader
 loader/windows/x64/
 .vs/
+example/default_rust/.idea/
+cmake/ext_cross_compile/.idea/
