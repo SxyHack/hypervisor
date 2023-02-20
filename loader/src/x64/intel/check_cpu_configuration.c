@@ -107,8 +107,11 @@
 /** @brief defines the EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVVPID MSR field */
 #define EPT_VPID_CAP_SUPPORT_ALL_CONTEXT_INVVPID (((uint64_t)1) << ((uint64_t)42))
 /** @brief defines the EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_RETAINING_GLOBALS_INVVPID MSR field */
-#define EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_RETAINING_GLOBALS_INVVPID                              \
-    (((uint64_t)1) << ((uint64_t)43))
+#define EPT_VPID_CAP_SUPPORT_SINGLE_CONTEXT_RETAINING_GLOBALS_INVVPID (((uint64_t)1) << ((uint64_t)43))
+
+/** @brief defines the MSR_VMX_MTRR_DEF_TYPE MSR  */
+#define MSR_VMX_MTRR_DEF_TYPE ((uint32_t)0x000002FF)
+#define MSR_MTRR_ENABLE (((uint64_t)1) << ((uint64_t)11))
 
 /**
  * <!-- description -->
@@ -336,6 +339,26 @@ check_for_xsave(void) NOEXCEPT
 
 /**
  * <!-- description -->
+ *   @brief Check if the cpu supports MTRR.
+ *
+ * <!-- inputs/outputs -->
+ *   @return Returns 0 on success, LOADER_FAILURE otherwise.
+ */
+NODISCARD static inline int64_t
+check_for_mtrr(void) NOEXCEPT
+{
+    uint64_t msr = intrinsic_rdmsr(MSR_VMX_MTRR_DEF_TYPE);
+
+    if ((msr & MSR_MTRR_ENABLE) == 0) {
+        bferror_x64("MTRR Dynamic Ranges not supported", msr);
+        return LOADER_FAILURE;
+    }
+
+    return LOADER_SUCCESS;
+}
+
+/**
+ * <!-- description -->
  *   @brief Check if the cpu supports EPT.
  *
  * <!-- inputs/outputs -->
@@ -448,6 +471,11 @@ check_cpu_configuration(void) NOEXCEPT
 
     if (check_for_xsave()) {
         bferror("check_for_xsave failed");
+        return LOADER_FAILURE;
+    }
+
+    if (check_for_mtrr()) {
+        bferror("check_for_mtrr failed");
         return LOADER_FAILURE;
     }
 
