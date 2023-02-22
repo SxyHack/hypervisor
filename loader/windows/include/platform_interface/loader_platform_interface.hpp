@@ -55,19 +55,22 @@
 namespace loader
 {
     /// @brief defines the GUID name of the loader
-    DEFINE_GUID(
-        DEVICE_NAME,
-        0x1d9c9218,
-        0x3c88,
-        0x4b81,
-        0x8e,
-        0x81,
-        0xb4,
-        0x62,
-        0x2a,
-        0x4d,
-        0xcb,
-        0x46);
+    // origin version
+    //DEFINE_GUID(
+    //    DEVICE_NAME,
+    //    0x1d9c9218,
+    //    0x3c88,
+    //    0x4b81,
+    //    0x8e,
+    //    0x81,
+    //    0xb4,
+    //    0x62,
+    //    0x2a,
+    //    0x4d,
+    //    0xcb,
+    //    0x46);
+    // use `Uuidgen.exe -s -c `
+    DEFINE_GUID(DEVICE_NAME, 0x166E013B, 0x8F92, 0x4ED4, 0x9C, 0xAB, 0x29, 0xC8, 0x19, 0xC1, 0x5A, 0x8A);
 
     /// @brief defines IOCTL for starting a VM
     constexpr bsl::safe_umx START_VMM{static_cast<bsl::uintmx>(
