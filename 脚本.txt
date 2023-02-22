@@ -6,3 +6,8 @@ cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DBSL_DEBUG
 ```
 cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=D:/Code/Cpp/VT/hypervisor/example/default_rust -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE
 ```
+
+### HOME
+```
+cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=F:/Code/Cpp/Kernel/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=F:/Code/Cpp/Kernel/hypervisor/example/default_rust -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE
+```

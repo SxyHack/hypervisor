@@ -172,10 +172,10 @@ pub use dispatch_vmexit::*;
 pub mod dispatch_fail;
 pub use dispatch_fail::*;
 
-#[path = "x64/mtrr_t.rs"]
-#[doc(hidden)]
-pub mod mtrr_t;
-pub use mtrr_t::*;
+// #[path = "x64/mtrr_t.rs"]
+// #[doc(hidden)]
+// pub mod mtrr_t;
+// pub use mtrr_t::*;
 
 // -----------------------------------------------------------------------------
 // Globals

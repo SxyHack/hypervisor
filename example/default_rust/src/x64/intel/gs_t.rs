@@ -22,9 +22,9 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#[path = "../mtrr_t.rs"]
-pub mod mtrr_t;
-pub use mtrr_t::*;
+// #[path = "../mtrr_t.rs"]
+// pub mod mtrr_t;
+// pub use mtrr_t::*;
 
 /// <!-- description -->
 ///   @brief Defines the extension's Global Storage (GS).
