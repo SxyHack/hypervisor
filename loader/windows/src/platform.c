@@ -42,6 +42,23 @@
 
 #define BF_TAG 'BFLK'
 
+// Functions
+NTKERNELAPI
+_IRQL_requires_max_(APC_LEVEL) 
+_IRQL_requires_min_(PASSIVE_LEVEL)
+_IRQL_requires_same_ 
+VOID KeGenericCallDpc(_In_ PKDEFERRED_ROUTINE Routine, _In_opt_ PVOID Context);
+
+NTKERNELAPI
+_IRQL_requires_(DISPATCH_LEVEL)
+_IRQL_requires_same_ 
+VOID KeSignalCallDpcDone(_In_ PVOID SystemArgument1);
+
+NTKERNELAPI
+_IRQL_requires_(DISPATCH_LEVEL)
+_IRQL_requires_same_ 
+LOGICAL KeSignalCallDpcSynchronize(_In_ PVOID SystemArgument2);
+
 /**
  * <!-- description -->
  *   @brief If test is false, a contract violation has occurred. This
@@ -413,8 +430,7 @@ platform_num_online_cpus(void) NOEXCEPT
  *   @param SystemArgument2 ignored
  */
 VOID
-work_on_cpu_callback(
-    KDPC *DPC, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2) NOEXCEPT
+work_on_cpu_callback(KDPC *DPC, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2) NOEXCEPT
 {
     struct work_on_cpu_callback_args *args = ((struct work_on_cpu_callback_args *)DeferredContext);
 
@@ -436,10 +452,7 @@ work_on_cpu_callback(
  *   @param args the arguments for work_on_cpu_callback
  */
 void
-work_on_cpu(
-    uint32_t const cpu,
-    PKDEFERRED_ROUTINE const callback,
-    struct work_on_cpu_callback_args *const args) NOEXCEPT
+work_on_cpu(uint32_t const cpu, PKDEFERRED_ROUTINE const callback, struct work_on_cpu_callback_args *const args) NOEXCEPT
 {
     NTSTATUS status;
     PROCESSOR_NUMBER ProcNumber;
@@ -532,6 +545,39 @@ platform_on_each_cpu_reverse(platform_per_cpu_func const func) NOEXCEPT
     return LOADER_SUCCESS;
 }
 
+VOID
+work_on_cpu_parallel_callback(KDPC *DPC, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2) NOEXCEPT
+{
+    UNREFERENCED_PARAMETER(DPC);
+    uint32_t cpu = 0;
+    int64_t  ret = LOADER_FAILURE;
+
+    DbgBreakPoint();
+    platform_per_cpu_func func = (platform_per_cpu_func)DeferredContext;
+    cpu = (uint32_t)KeGetCurrentProcessorNumber();
+    bfdebug_x64("start vmm for cpu", cpu);
+
+    ret = func(cpu);
+
+    bfdebug_x64("dump:", ret);
+
+    // Wait for all DPCs to synchronize at this point
+    KeSignalCallDpcSynchronize(SystemArgument2);
+
+    // Mark the DPC as being complete
+    KeSignalCallDpcDone(SystemArgument1);
+}
+
+NODISCARD static int64_t
+platform_on_each_cpu_parallel(platform_per_cpu_func const func) NOEXCEPT
+{
+    DbgBreakPoint();
+
+    KeGenericCallDpc(work_on_cpu_parallel_callback, (PVOID)func);
+
+    return LOADER_SUCCESS;
+}
+
 /**
  * <!-- description -->
  *   @brief Calls the user provided callback on each CPU. If each callback
@@ -550,13 +596,19 @@ platform_on_each_cpu_reverse(platform_per_cpu_func const func) NOEXCEPT
 NODISCARD int64_t
 platform_on_each_cpu(platform_per_cpu_func const func, uint32_t const order) NOEXCEPT
 {
-    int64_t ret;
+    int64_t ret = LOADER_FAILURE;
+    DbgBreakPoint();
 
-    if (PLATFORM_FORWARD == order) {
-        ret = platform_on_each_cpu_forward(func);
-    }
-    else {
-        ret = platform_on_each_cpu_reverse(func);
+    switch (order) {
+        case PLATFORM_PARALLEL:
+            ret = platform_on_each_cpu_parallel(func);
+            break;
+        case PLATFORM_FORWARD:
+            ret = platform_on_each_cpu_forward(func);
+            break;
+        case PLATFORM_REVERSE:
+            ret = platform_on_each_cpu_reverse(func);
+            break;
     }
 
     return ret;

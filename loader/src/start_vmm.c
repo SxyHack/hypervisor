@@ -161,7 +161,7 @@ alloc_and_start_the_vmm(struct start_vmm_args_t const *const args) NOEXCEPT
     dump_mk_huge_pool(&g_mut_mk_huge_pool);
 #endif
 
-    if (platform_on_each_cpu(start_vmm_per_cpu, PLATFORM_FORWARD)) {
+    if (platform_on_each_cpu(start_vmm_per_cpu, PLATFORM_PARALLEL)) {
         bferror("start_vmm_per_cpu failed");
         goto start_vmm_per_cpu_failed;
     }

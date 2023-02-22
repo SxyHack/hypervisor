@@ -35,9 +35,11 @@ extern "C"
 #endif
 
 /** @brief execute each CPU in forward order (i.e., incrementing) */
-#define PLATFORM_FORWARD ((uint32_t)0U)
+#define PLATFORM_FORWARD  ((uint32_t)0U)
 /** @brief execute each CPU in reverse order (i.e., decrementing) */
-#define PLATFORM_REVERSE ((uint32_t)1U)
+#define PLATFORM_REVERSE  ((uint32_t)1U)
+/** @brief execute each CPU in parallel mode */
+#define PLATFORM_PARALLEL ((uint32_t)2U)
 
     /**
     * @brief The callback signature for platform_on_each_cpu
