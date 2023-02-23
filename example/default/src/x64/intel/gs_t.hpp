@@ -43,7 +43,6 @@ namespace example
     struct gs_t final
     {
         /// @brief stores the MSR bitmap used by this vs_t
-        /// œ» ‘ ‘“ª∏ˆ MSR_BITMAP
         lib::basic_page_4k_t *msr_bitmap{};
         /// @brief stores the physical address of the MSR bitmap above
         bsl::safe_umx msr_bitmap_phys{};
