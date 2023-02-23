@@ -1,0 +1,25 @@
+[package]
+name = "rust"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["staticlib"]
+
+[features]
+default = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"]
+debug_level_v = []
+debug_level_vv = []
+debug_level_vvv = []
+disable_color = []
+release_mode = []
+AuthenticAMD = []
+GenuineIntel = []
+custom_print_thread_id = []
+
+[dependencies]
+bsl = { path = "D:/Code/Cpp/VT/hypervisor/bsl", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
+syscall = { path = "D:/Code/Cpp/VT/hypervisor/syscall", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
+#bit-struct = "0.3.1"
+#serde = "1.0.152"

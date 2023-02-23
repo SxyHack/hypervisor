@@ -27,6 +27,9 @@
 pub mod mtrr_t;
 pub use mtrr_t::*;
 
+pub mod ept;
+pub use ept::*;
+
 /// <!-- description -->
 ///   @brief Defines the extension's Global Storage (GS).
 ///     Extensions can use this to store global variables as needed.
