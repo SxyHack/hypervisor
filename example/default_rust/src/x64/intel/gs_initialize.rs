@@ -22,10 +22,6 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-// #[path = "../mtrr_t.rs"]
-// pub mod mtrr_t;
-// pub use mtrr_t::*;
-
 /// <!-- description -->
 ///   @brief Initializes the Global Storage (GS).
 ///
@@ -49,6 +45,11 @@ pub fn gs_initialize(
         return bsl::errc_failure;
     }
 
-    // return gs.mtrr.build(sys, intrinsic);
+    let ret = gs.mtrr.build(sys, intrinsic);
+    if !ret.success() {
+        bsl::error!("{}", bsl::here());
+        return bsl::errc_failure;
+    }
+
     return bsl::errc_success;
 }

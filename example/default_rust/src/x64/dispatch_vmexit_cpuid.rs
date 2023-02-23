@@ -134,7 +134,7 @@ pub fn dispatch_vmexit_cpuid(
 
                 debug!(
                     "root OS had been {}demoted{} to vm {}{:#06x}{} on pp {}{:#06x}{}\n",
-                    bsl::grn,
+                    bsl::red,
                     bsl::rst,
                     bsl::cyn,
                     syscall::BfSyscallT::bf_tls_vmid(),

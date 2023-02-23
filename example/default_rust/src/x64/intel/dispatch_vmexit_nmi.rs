@@ -50,7 +50,7 @@ pub fn dispatch_vmexit_nmi(
     //   this, all we do is enable the NMI window, which will tell us
     //   when we can safely inject the NMI.
     // - Note that the microkernel will do the same thing. If an NMI
-    //   fires while the hypervisor is running, it will enable the NMI
+    //   fires while the hypevisor is running, it will enable the NMI
     //   window, which the extension will see as a VMExit, and must
     //   from there, inject the NMI into the appropriate VS.
     //

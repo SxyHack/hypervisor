@@ -172,11 +172,6 @@ pub use dispatch_vmexit::*;
 pub mod dispatch_fail;
 pub use dispatch_fail::*;
 
-// #[path = "x64/mtrr_t.rs"]
-// #[doc(hidden)]
-// pub mod mtrr_t;
-// pub use mtrr_t::*;
-
 // -----------------------------------------------------------------------------
 // Globals
 // -----------------------------------------------------------------------------
@@ -211,9 +206,7 @@ fn putchar(c: u8) {
 
 #[no_mangle]
 fn bootstrap_entry(ppid: u16) {
-    /// NOTE: CPU进入VM时会调用一次
     let ret: bsl::ErrcType;
-    print_v!("bootstrap_entry {}", bsl::here());
 
     // NOTE:
     // - Call into the bootstrap handler. This entry point serves as a
@@ -330,7 +323,6 @@ fn fail_entry(errc: u64, addr: u64) {
     syscall::bf_control_op_exit();
 }
 
-/// 进入 Root Mode 之前会调用一次
 #[no_mangle]
 pub fn ext_main_entry(version: u32) -> i32 {
     let mut ret: bsl::ErrcType;

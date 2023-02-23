@@ -1,5 +1,3 @@
-use bsl::Integer;
-
 const MTRR_MAX_RANGES: usize = 512;
 
 /// @brief defines the MSR_IA32_MTRR_CAPABILITIES
@@ -7,14 +5,14 @@ const MSR_IA32_MTRR_CAPABILITIES: u32 = 0x000000FE;
 /// @brief defines the MSR_IA32_MTRR_CAPABILITIES.VCNT field
 const MSR_IA32_MTRR_CAP_VCNT: u64 = 0x00000000000000FF;
 
-/// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR
-const MSR_IA32_MTRR_DEFTYPE: u32 = 0x000002FF;
-/// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR type field
-const MSR_IA32_MTRR_DEFTYPE_TYPE: u64 = 0x00000000000000FF;
-/// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR fixed range enable field
-const MSR_IA32_MTRR_DEFTYPE_FE: u64 = 0x0000000000000400;
-/// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR enable field
-const MSR_IA32_MTRR_DEFTYPE_E: u64 = 0x0000000000000800;
+// /// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR
+// const MSR_IA32_MTRR_DEFTYPE: u32 = 0x000002FF;
+// /// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR type field
+// const MSR_IA32_MTRR_DEFTYPE_TYPE: u64 = 0x00000000000000FF;
+// /// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR fixed range enable field
+// const MSR_IA32_MTRR_DEFTYPE_FE: u64 = 0x0000000000000400;
+// /// @brief defines the MSR_IA32_MTRR_DEFTYPE MSR enable field
+// const MSR_IA32_MTRR_DEFTYPE_E: u64 = 0x0000000000000800;
 
 const MSR_IA32_MTRR_PHYSBASE0: u32 = 0x00000200;
 const MSR_IA32_MTRR_PHYSMASK0: u32 = 0x00000201;
@@ -23,42 +21,39 @@ const CPUID_LP_ADDRESS_SIZE: usize = 0x80000008;
 const CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS: usize = 0x000000FF;
 
 /// memory types
-/// @brief defines the uncacheable memory type
-const MEMORY_TYPE_UC: usize = 0;
-/// @brief defines the write-combine memory type
-const MEMORY_TYPE_WC: usize = 1;
-/// @brief defines the write-through memory type
-const MEMORY_TYPE_WT: usize = 4;
-/// @brief defines the write-protect memory type
-const MEMORY_TYPE_WP: usize = 5;
+// /// @brief defines the uncacheable memory type
+// const MEMORY_TYPE_UC: usize = 0;
+// /// @brief defines the write-combine memory type
+// const MEMORY_TYPE_WC: usize = 1;
+// /// @brief defines the write-through memory type
+// const MEMORY_TYPE_WT: usize = 4;
+// /// @brief defines the write-protect memory type
+// const MEMORY_TYPE_WP: usize = 5;
 /// @brief defines the write-back memory type
 const MEMORY_TYPE_WB: usize = 6;
 
 
-#[derive(Default, Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct MtrrRangeT {
-    addr: bsl::SafeUMx,
-    size: bsl::SafeUMx,
-    memory_type: bsl::SafeUMx,
-    default: bool,
+    addr: bsl::SafeU64,
+    size: bsl::SafeU64,
+    memory_type: bsl::SafeU64,
 }
 
 impl MtrrRangeT {
     pub const fn default() -> Self {
         Self {
-            addr: bsl::SafeUMx::new(0),
-            size: bsl::SafeUMx::new(0),
-            memory_type: bsl::SafeUMx::new(0),
-            default: false,
+            addr: bsl::SafeU64::new(0),
+            size: bsl::SafeU64::new(0),
+            memory_type: bsl::SafeU64::new(0),
         }
     }
 
-    pub fn new(addr: bsl::SafeUMx, size: bsl::SafeUMx, memory_type: bsl::SafeUMx, default: bool) -> Self {
+    pub fn new(addr: bsl::SafeU64, size: bsl::SafeU64, memory_type: bsl::SafeU64) -> Self {
         Self {
             addr,
             size,
             memory_type,
-            default,
         }
     }
 }
@@ -89,8 +84,7 @@ impl MtrrT {
         intrinsic.cpuid(&mut rax, &mut rbx, &mut rcx, &mut rdx);
 
         let pas = rax & bsl::to_u64(CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS);
-        let pas_bytes = bsl::SafeUMx::magic_1() << (pas.get() as usize);
-        bsl::print_v!("pas={}, bytes={}", pas, pas_bytes);
+        // let pas_bytes = bsl::SafeUMx::magic_1() << (pas.get() as usize);
 
         // NOTE:
         // - The next step is to get the MTRR information from the MSRs.
@@ -99,40 +93,9 @@ impl MtrrT {
         let msr = bsl::to_u32(MSR_IA32_MTRR_CAPABILITIES);
         let cap = sys.bf_intrinsic_op_rdmsr(msr);
         let cap_vcnt = bsl::to_u32(cap & MSR_IA32_MTRR_CAP_VCNT);
-        bsl::debug_v!("cap_vcnt={}", cap_vcnt);
+        bsl::debug_v!("cap_vcnt={}\n", cap_vcnt);
 
-        // let msr = bsl::to_u32(MSR_IA32_MTRR_DEFTYPE);
-        // let def_type = sys.bf_intrinsic_op_rdmsr(msr);
-        // let def_type_type = def_type & MSR_IA32_MTRR_DEFTYPE_TYPE;
-        // let def_type_fe = def_type & MSR_IA32_MTRR_DEFTYPE_FE;
-        // let def_type_e = def_type & MSR_IA32_MTRR_DEFTYPE_E;
-
-        self.add_vcnt_range(cap_vcnt, pas, sys, intrinsic);
-        // NOTE:
-        // - If the MTRRs are disabled, the default memory type is uncacheable.
-        // if def_type_e.is_zero() {
-        //     bsl::print_v!("MTRR are disabled, {}", bsl::here());
-        //     let ret = self.add_range(MtrrRangeT::new(
-        //         bsl::SafeUMx::magic_0(),
-        //         pas_bytes,
-        //         bsl::SafeUMx::new(MEMORY_TYPE_UC),
-        //         false));
-        //
-        //     if ret == bsl::errc_failure {
-        //         bsl::print_v!("{}", bsl::here())
-        //     }
-        //
-        //     return ret;
-        // }
-        // let ret = self.add_range(MtrrRangeT::new(
-        //     bsl::SafeUMx::magic_0(),
-        //     pas_bytes,
-        //     bsl::SafeUMx::new(def_type_type.get() as usize),
-        //     true));
-        // if ret == bsl::errc_failure {
-        //     bsl::print_v!("{}", bsl::here());
-        //     return ret;
-        // }
+        self.add_vcnt_range(cap_vcnt, pas, sys);
 
         return bsl::errc_success;
     }
@@ -148,11 +111,10 @@ impl MtrrT {
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
-    pub fn add_vcnt_range(&mut self,
+    fn add_vcnt_range(&mut self,
                           vcnt: bsl::SafeU32,
                           pas: bsl::SafeU64,
-                          sys: &syscall::BfSyscallT,
-                          intrinsic: &crate::IntrinsicT) -> bsl::ErrcType {
+                          sys: &syscall::BfSyscallT) -> bsl::ErrcType {
         for i in 0..vcnt.get() {
             let mtrr_phys_mask_n = bsl::to_u32(MSR_IA32_MTRR_PHYSMASK0 + (i * 2));
             let mtrr_phys_base_n = bsl::to_u32(MSR_IA32_MTRR_PHYSBASE0 + (i * 2));
@@ -163,11 +125,21 @@ impl MtrrT {
                 continue
             }
 
-            let base = MtrrT::physbase_to_addr(phys_base);
+            let addr = MtrrT::physbase_to_addr(phys_base);
             let size = MtrrT::physmask_to_size(phys_mask, pas);
-            let kind = MtrrT::physbase_to_type(phys_base);
+            let memory_type = MtrrT::physbase_to_type(phys_base);
 
-            bsl::debug!("MtrrRange: {:#64x}, {:#64x}, {}", base, size, kind);
+            bsl::debug!("MtrrRange: [{:#016x}-{:#016x}] Type={}\n", addr, size, memory_type);
+            
+            if memory_type == bsl::to_u64(MEMORY_TYPE_WB) {
+                continue;
+            }
+
+            let ret = self.add_range(MtrrRangeT::new(addr, size, memory_type));
+            if ret == bsl::errc_failure {
+                bsl::error!("MTRR add range failed, {}", bsl::here());
+                return ret;
+            }
         }
 
         bsl::errc_success
@@ -183,7 +155,7 @@ impl MtrrT {
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
-    pub fn add_range(&mut self, r: MtrrRangeT) -> bsl::ErrcType {
+    fn add_range(&mut self, r: MtrrRangeT) -> bsl::ErrcType {
         if let Some(item) = self.ranges.get_mut(self.ranges_count) {
             *item = r;
             self.ranges_count += 1;
@@ -193,8 +165,6 @@ impl MtrrT {
             bsl::errc_failure
         }
     }
-
-
 
     /// <!-- description -->
     /// @brief Returns true if the valid bit is set in physmask,false otherwise.
@@ -207,7 +177,7 @@ impl MtrrT {
     ///
     fn physmask_is_valid(physmask: bsl::SafeU64) -> bool {
         let mask = bsl::SafeU64::new(0b100000000000);
-        let valid = (physmask & mask);
+        let valid = physmask & mask;
         valid.is_pos()
     }
 
@@ -242,4 +212,5 @@ impl MtrrT {
         let mask = bsl::SafeU64::new(0x00000000000000FF);
         return physbase & mask;
     }
+    
 }

@@ -22,9 +22,10 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-// #[path = "../mtrr_t.rs"]
-// pub mod mtrr_t;
-// pub use mtrr_t::*;
+#[path = "../mtrr_t.rs"]
+#[doc(hidden)]
+pub mod mtrr_t;
+pub use mtrr_t::*;
 
 /// <!-- description -->
 ///   @brief Defines the extension's Global Storage (GS).
@@ -42,7 +43,7 @@ pub struct GsT {
     /// @brief stores the physical address of the MSR bitmap above
     pub msr_bitmap_phys: bsl::SafeU64,
     // /// @brief stores the MTRR used by ept
-    // pub mtrr: MtrrT,
+    pub mtrr: MtrrT,
 }
 
 impl GsT {
@@ -53,7 +54,7 @@ impl GsT {
         Self {
             msr_bitmap: core::ptr::null_mut(),
             msr_bitmap_phys: bsl::SafeU64::new(0),
-            // mtrr: MtrrT::new()
+            mtrr: MtrrT::new(),
         }
     }
 }
