@@ -1,7 +1,7 @@
 [package]
 name = "rust"
 version = "1.0.0"
-edition = "2021"
+edition = "2018"
 
 [lib]
 path = "src/lib.rs"
@@ -19,7 +19,6 @@ GenuineIntel = []
 custom_print_thread_id = []
 
 [dependencies]
-bsl = { path = "D:/Code/Cpp/VT/hypervisor/bsl", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
-syscall = { path = "D:/Code/Cpp/VT/hypervisor/syscall", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
-#bit-struct = "0.3.1"
-#serde = "1.0.152"
+bsl = { path = "../../bsl", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
+syscall = { path = "../../syscall", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
+bitfield-struct = "0.3"

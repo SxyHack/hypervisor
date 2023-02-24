@@ -33,6 +33,7 @@ const CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS: usize = 0x000000FF;
 const MEMORY_TYPE_WB: usize = 6;
 
 
+
 #[derive(Debug, Clone, Copy)]
 pub struct MtrrRangeT {
     addr: bsl::SafeU64,
