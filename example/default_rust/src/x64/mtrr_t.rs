@@ -82,6 +82,8 @@ impl MtrrT {
         let mut rcx = bsl::to_u64(0);
         let mut rdx = bsl::to_u64(0);
 
+        let s = core::mem::size_of::<i16>();
+        bsl::debug_v!("sizeof={}\n", s);
         intrinsic.cpuid(&mut rax, &mut rbx, &mut rcx, &mut rdx);
 
         let pas = rax & bsl::to_u64(CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS);

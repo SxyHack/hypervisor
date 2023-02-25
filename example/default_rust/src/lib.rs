@@ -8,6 +8,7 @@
 #[macro_use]
 extern crate bsl;
 extern crate syscall;
+extern crate core;
 
 macro_rules! print_thread_id {
     ($($arg:tt)*) => {
