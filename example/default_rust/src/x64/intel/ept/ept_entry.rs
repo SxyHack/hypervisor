@@ -1,40 +1,40 @@
 use bitfield_struct::bitfield;
 
-/// @struct EptEntryPdt
+/// @struct EptEntryT
 ///
 /// <!-- description -->
 ///   @brief Defines the layout of a nested page-directory table entry
 ///     (EPDTE).
 ///
 #[bitfield(u64)]
-struct EptEntryPdt {
+pub struct EptEntryT {
     /// @brief defines the "read access" field in the page
-    r: bool,
+    pub r: bool,
     /// @brief defines the "write access" field in the page
-    w: bool,
+    pub w: bool,
     /// @brief defines the "execute access" field in the page
-    e: bool,
+    pub e: bool,
     /// @brief defines the "memory type" field in the page
     #[bits(3)]
-    mem_type: usize,
+    pub mem_type: usize,
     /// @brief defines the "ignore pat" field in the page
-    ignore_pat: bool,
+    pub ignore_pat: bool,
     /// @brief defines the "large page" field in the page
-    large_page: bool,
+    pub large_page: bool,
     /// @brief defines the "accessed" field in the page
-    a: bool,
+    pub a: bool,
     /// @brief defines the "dirty" field in the page
-    d: bool,
+    pub d: bool,
     /// @brief defines the "user execute access" field in the page
-    e_user: bool,
+    pub e_user: bool,
     /// @brief defines the "ignored" field in the page
-    ignored1: bool,
+    pub ignored1: bool,
     /// @brief defines the "physical address" field in the page
     #[bits(40)]
-    phys: usize,
+    pub phys: usize,
     /// @brief defines the "ignored" field in the page
     #[bits(11)]
-    ignored2: usize,
+    pub ignored2: usize,
     /// @brief defines the "virtualization exception" field in the page
-    ve: bool
+    pub ve: bool
 }

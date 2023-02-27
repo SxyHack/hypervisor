@@ -51,5 +51,6 @@ pub fn gs_initialize(
         return bsl::errc_failure;
     }
 
-    return bsl::errc_success;
+    gs.eptp.initialize(sys)
+    // return bsl::errc_success;
 }

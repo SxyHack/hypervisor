@@ -22,4 +22,7 @@ custom_print_thread_id = []
 bsl = { path = "../../bsl", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
 syscall = { path = "../../syscall", features = ["custom_print_thread_id","GenuineIntel","debug_level_v","release_mode"] }
 bitfield-struct = "0.3"
-libc = "0.2"
+#libc = "0.2"
+#ntapi = { version = "0.4.0", features = ["kernel", "impl-default"] }
+#winapi = { version = "0.3.9", features = ["ntdef", "ntstatus", "basetsd", "winnt"] }
+#win32api-rs-sys = "0.1.0"
