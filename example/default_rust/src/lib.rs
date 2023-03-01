@@ -4,6 +4,8 @@
 #![no_std]
 #![feature(thread_local)]
 #![feature(panic_info_message)]
+#![feature(strict_provenance)]
+#![feature(core_intrinsics)]
 
 #[macro_use]
 extern crate bsl;

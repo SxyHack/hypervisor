@@ -45,12 +45,12 @@ pub fn gs_initialize(
         return bsl::errc_failure;
     }
 
-    let ret = gs.mtrr.build(sys, intrinsic);
+    let ret = gs.mtrr.initialize(sys, intrinsic);
     if !ret.success() {
         bsl::error!("{}", bsl::here());
         return bsl::errc_failure;
     }
 
-    gs.eptp.initialize(sys)
+    gs.ept.initialize(&gs.mtrr, sys)
     // return bsl::errc_success;
 }

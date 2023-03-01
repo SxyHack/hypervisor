@@ -21,8 +21,8 @@ const CPUID_LP_ADDRESS_SIZE: usize = 0x80000008;
 const CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS: usize = 0x000000FF;
 
 /// memory types
-// /// @brief defines the uncacheable memory type
-// const MEMORY_TYPE_UC: usize = 0;
+/// @brief defines the uncacheable memory type
+pub const MEMORY_TYPE_UC: usize = 0;
 // /// @brief defines the write-combine memory type
 // const MEMORY_TYPE_WC: usize = 1;
 // /// @brief defines the write-through memory type
@@ -30,9 +30,7 @@ const CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS: usize = 0x000000FF;
 // /// @brief defines the write-protect memory type
 // const MEMORY_TYPE_WP: usize = 5;
 /// @brief defines the write-back memory type
-const MEMORY_TYPE_WB: usize = 6;
-
-
+pub const MEMORY_TYPE_WB: usize = 6;
 
 #[derive(Debug, Clone, Copy)]
 pub struct MtrrRangeT {
@@ -76,7 +74,11 @@ impl MtrrT {
         }
     }
 
-    pub fn build(&mut self, sys: &syscall::BfSyscallT, intrinsic: &crate::IntrinsicT) -> bsl::ErrcType {
+    pub fn initialize(
+        &mut self,
+        sys: &syscall::BfSyscallT,
+        intrinsic: &crate::IntrinsicT,
+    ) -> bsl::ErrcType {
         let mut rax = bsl::to_u64(CPUID_LP_ADDRESS_SIZE);
         let mut rbx = bsl::to_u64(0);
         let mut rcx = bsl::to_u64(0);
@@ -112,10 +114,12 @@ impl MtrrT {
     ///   @return Returns bsl::errc_success on success and bsl::errc_failure
     ///     on failure.
     ///
-    fn add_vcnt_range(&mut self,
-                          vcnt: bsl::SafeU32,
-                          pas: bsl::SafeU64,
-                          sys: &syscall::BfSyscallT) -> bsl::ErrcType {
+    fn add_vcnt_range(
+        &mut self,
+        vcnt: bsl::SafeU32,
+        pas: bsl::SafeU64,
+        sys: &syscall::BfSyscallT,
+    ) -> bsl::ErrcType {
         for i in 0..vcnt.get() {
             let mtrr_phys_mask_n = bsl::to_u32(MSR_IA32_MTRR_PHYSMASK0 + (i * 2));
             let mtrr_phys_base_n = bsl::to_u32(MSR_IA32_MTRR_PHYSBASE0 + (i * 2));
@@ -123,15 +127,20 @@ impl MtrrT {
             let phys_base = sys.bf_intrinsic_op_rdmsr(mtrr_phys_base_n);
 
             if !MtrrT::physmask_is_valid(phys_mask) {
-                continue
+                continue;
             }
 
             let addr = MtrrT::physbase_to_addr(phys_base);
             let size = MtrrT::physmask_to_size(phys_mask, pas);
             let memory_type = MtrrT::physbase_to_type(phys_base);
 
-            bsl::debug!("MtrrRange: [{:#016x}-{:#016x}] Type={}\n", addr, size, memory_type);
-            
+            bsl::debug!(
+                "MtrrRange: [{:#016x}-{:#016x}] Type={}\n",
+                addr,
+                size,
+                memory_type
+            );
+
             if memory_type == bsl::to_u64(MEMORY_TYPE_WB) {
                 continue;
             }
@@ -213,5 +222,4 @@ impl MtrrT {
         let mask = bsl::SafeU64::new(0x00000000000000FF);
         return physbase & mask;
     }
-    
 }

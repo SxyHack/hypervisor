@@ -48,7 +48,7 @@ pub struct GsT {
     /// @brief stores the MTRR used by ept
     pub mtrr: MtrrT,
     /// @brief stores the EPT
-    pub eptp: ExtentPageTable, 
+    pub ept: ExtentPageTable, 
 }
 
 impl GsT {
@@ -60,7 +60,7 @@ impl GsT {
             msr_bitmap: core::ptr::null_mut(),
             msr_bitmap_phys: bsl::SafeU64::new(0),
             mtrr: MtrrT::new(),
-            eptp: ExtentPageTable::new(),
+            ept: ExtentPageTable::new(),
         }
     }
 }
