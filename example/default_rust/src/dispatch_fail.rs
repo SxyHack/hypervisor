@@ -63,8 +63,6 @@ pub fn dispatch_fail(
     bsl::discard(vp_pool);
     bsl::discard(vs_pool);
 
-    
-
     // NOTE:
     // - Tells the microkernel that we didn't handle the fast fail.
     //   When this occurs, the microkernel will halt this PP. In most
@@ -80,6 +78,7 @@ pub fn dispatch_fail(
     //   fault system works properly during testing.
     //
 
-    alert!("this extension does not support handling fast fail events\n");
-    return bsl::errc_failure;
+    // alert!("this extension does not support handling fast fail events\n");
+    return sys.bf_vs_op_advance_ip_and_run_current();
+    // return bsl::errc_failure;
 }

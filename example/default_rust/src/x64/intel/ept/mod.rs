@@ -6,6 +6,7 @@ use ept_pointer::EptPointerT;
 
 use crate::{mtrr_t, MtrrT};
 
+
 const EPT_PML_SIZE: usize = 512;
 
 /// EPT
@@ -76,7 +77,7 @@ impl ExtentPageTable {
             }
 
             bsl::print_v!(
-                "{:#02X}: PHYS={:#08X} VIRT={:#08X} PAGE={:#08X}\n",
+                "{:#02X}: PHYS={:#016X} VIRT={:#016X} PAGE={:#016X}\n",
                 i,
                 phys,
                 virt.addr(),
@@ -96,22 +97,24 @@ impl ExtentPageTable {
         // 相当于 pml3_phys / syscall::HYPERVISOR_PAGE_SIZE;
         let pml3_pfn = (self.pml3_phys >> syscall::HYPERVISOR_PAGE_SHIFT).get() as usize;
         unsafe {
-            // (*self.pml4).set_phys(pml3_pfn);
+            (*self.pml4).set_phys(pml3_pfn);
             (*self.pml4).set_w(true);
             (*self.pml4).set_r(true);
             (*self.pml4).set_e(true);
         }
 
+        let pml3_virt = sys.bf_vm_op_map_direct::<u8>(syscall::BF_ROOT_VMID, self.pml3_phys);
+
         bsl::print_v!(
-            "Allocated PML4 & PML3\n{:#08X}\n{:#08X}\n",
+            "Allocated PML4 & PML3\n{:#08X}\n{:#08X} - {:#08X}\n",
             self.pml4_phys,
-            self.pml3_phys
+            self.pml3_phys, self.pml3_phys
         );
         bsl::print_v!("PML4.pml3_pfn={:#08X}\n", pml3_pfn);
 
-        unsafe {
-            core::intrinsics::breakpoint();
-        };
+        // unsafe {
+        //     core::intrinsics::breakpoint();
+        // };
 
         // 初始化 PML3 入口
         for i in 0..EPT_PML_SIZE {
@@ -150,7 +153,7 @@ impl ExtentPageTable {
         self.eptp.set_pfn(pml4_pfn);
 
         let mask: u64 = self.eptp.into();
-        bsl::print_v!("EPTP: {:#08X}\n", mask);
+        bsl::debug_v!("installed EPT, EPTP: {:#08X}\n", mask);
 
         self.initialized = true;
         bsl::errc_success
@@ -161,46 +164,4 @@ impl ExtentPageTable {
         bsl::to_u64(mask)
     }
 
-    // unsafe fn dump_pml3(&self) {
-    //     bsl::print_v!("dump ept pml3: {:#032X}\n", self.pml3_phys);
-
-    //     for i in 0..EPT_PML_SIZE {
-    //         let p = *self.pml3.add(i);
-    //         let v: u64 = p.into();
-    //         // bsl::print_v!("{}{}{}", p.r() as u8, p.w() as u8, p.e() as u8);
-    //         bsl::print_v!("{:#06x}", v);
-
-    //         if i < EPT_PML_SIZE - 1 {
-    //             bsl::print_v!(" ");
-    //         }
-
-    //         if i > 0 && i % 10 == 0 {
-    //             bsl::print_v!("\n");
-    //         }
-    //     }
-
-    //     bsl::print_v!("\n");
-    // }
 }
-
-// fn dump_pml_hex(entry: *mut EptEntryT, size: usize) {
-//     bsl::print_v!("dump ept pml:\n");
-
-//     for i in 0..size {
-//         let raw = entry as *mut u8;
-
-//         unsafe {
-//             bsl::print_v!("{:#02x}", *raw);
-//         }
-
-//         if i < size - 1 {
-//             bsl::print_v!(" ");
-//         }
-
-//         if i + 1 % 32 == 0 {
-//             bsl::print_v!("\n");
-//         }
-//     }
-
-//     bsl::print_v!("\n");
-// }

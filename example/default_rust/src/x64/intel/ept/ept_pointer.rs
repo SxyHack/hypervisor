@@ -3,9 +3,7 @@ use bitfield_struct::bitfield;
 /// @struct EptPointerT
 ///
 /// <!-- description -->
-///   @brief Defines the layout of a nested page-map level-4 table entry
-///     (EPML4TE).
-///
+///   @brief Defines the layout of a extended-page-table pointer (EPTP).
 #[bitfield(u64)]
 pub struct EptPointerT {
     /// [Bits 2:0] EPT paging-structure memory type:

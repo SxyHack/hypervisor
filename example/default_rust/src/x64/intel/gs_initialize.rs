@@ -44,6 +44,8 @@ pub fn gs_initialize(
         print_v!("{}", bsl::here());
         return bsl::errc_failure;
     }
+    
+    bsl::print_v!("Allocated MSR Bitmap: {:#08X}\n", gs.msr_bitmap_phys);
 
     let ret = gs.mtrr.initialize(sys, intrinsic);
     if !ret.success() {

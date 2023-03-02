@@ -179,7 +179,10 @@ impl VsT {
         proc2_ctls |= enable_invpcid;
         proc2_ctls |= enable_xsave;
         proc2_ctls |= enable_uwait;
-        proc2_ctls |= enable_ept;
+        // proc2_ctls |= enable_ept;
+        
+        // let idx = syscall::BF_REG_T_EPT_POINTER;
+        // bsl::expects(sys.bf_vs_op_write(self.id(), idx, gs.ept.eptp()));
 
         let idx = syscall::BF_REG_T_PIN_BASED_VM_EXECUTION_CTLS;
         bsl::expects(sys.bf_vs_op_write(self.id(), idx, pin_ctls));
@@ -199,8 +202,7 @@ impl VsT {
         let idx = syscall::BF_REG_T_ADDRESS_OF_MSR_BITMAPS;
         bsl::expects(sys.bf_vs_op_write(self.id(), idx, gs.msr_bitmap_phys));
 
-        let idx = syscall::BF_REG_T_EPT_POINTER;
-        bsl::expects(sys.bf_vs_op_write(self.id(), idx, gs.ept.eptp()));
+
 
         if syscall::BfSyscallT::is_vs_a_root_vs(self.id()) {
             bsl::expects(sys.bf_vs_op_init_as_root(self.id()));
