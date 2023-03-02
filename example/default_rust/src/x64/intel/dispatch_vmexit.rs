@@ -25,6 +25,8 @@
 const EXIT_REASON_NMI: u64 = 0x0;
 const EXIT_REASON_NMI_WINDOW: u64 = 0x8;
 const EXIT_REASON_CPUID: u64 = 0xA;
+const EXIT_REASON_EPT_VIOLATION: u64 = 48;
+const EXIT_REASON_EPT_MISCONFIG: u64 = 49;
 
 #[path = "dispatch_vmexit_nmi_window.rs"]
 #[doc(hidden)]
@@ -40,6 +42,11 @@ pub use dispatch_vmexit_nmi::*;
 #[doc(hidden)]
 pub mod dispatch_vmexit_cpuid;
 pub use dispatch_vmexit_cpuid::*;
+
+#[path = "dispatch_vmexit_ept.rs"]
+#[doc(hidden)]
+pub mod dispatch_vmexit_ept;
+pub use dispatch_vmexit_ept::*;
 
 /// <!-- description -->
 ///   @brief Dispatches the VMExit.
@@ -71,11 +78,10 @@ pub fn dispatch_vmexit(
 
     match exit_reason.get() {
         EXIT_REASON_NMI => return dispatch_vmexit_nmi(gs, tls, sys, vsid),
-
         EXIT_REASON_NMI_WINDOW => return dispatch_vmexit_nmi_window(gs, tls, sys, vsid),
-
         EXIT_REASON_CPUID => return dispatch_vmexit_cpuid(gs, tls, sys, intrinsic, vsid),
-
+        EXIT_REASON_EPT_VIOLATION => return dispatch_vmexit_ept_violation(gs, tls, sys, intrinsic, vsid),
+        EXIT_REASON_EPT_MISCONFIG => return dispatch_vmexit_ept_misconfig(gs, tls, sys, intrinsic, vsid),
         _ => {}
     }
 
