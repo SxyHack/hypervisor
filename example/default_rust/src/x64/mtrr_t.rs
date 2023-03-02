@@ -62,6 +62,7 @@ impl MtrrRangeT {
 /// view of the ranges as needed.
 #[derive(Debug, Copy, Clone)]
 pub struct MtrrT {
+    phys_addr_bits: bsl::SafeU64,
     ranges: [MtrrRangeT; MTRR_MAX_RANGES],
     ranges_count: usize,
 }
@@ -69,6 +70,7 @@ pub struct MtrrT {
 impl MtrrT {
     pub const fn new() -> Self {
         Self {
+            phys_addr_bits: bsl::SafeU64::new(0),
             ranges: [MtrrRangeT::default(); MTRR_MAX_RANGES],
             ranges_count: 0,
         }
@@ -87,6 +89,7 @@ impl MtrrT {
         intrinsic.cpuid(&mut rax, &mut rbx, &mut rcx, &mut rdx);
 
         let pas = rax & bsl::to_u64(CPUID_LP_ADDRESS_SIZE_PHYS_ADDR_BITS);
+        self.phys_addr_bits = pas;
         // let pas_bytes = bsl::SafeUMx::magic_1() << (pas.get() as usize);
 
         // NOTE:
@@ -96,7 +99,8 @@ impl MtrrT {
         let msr = bsl::to_u32(MSR_IA32_MTRR_CAPABILITIES);
         let cap = sys.bf_intrinsic_op_rdmsr(msr);
         let cap_vcnt = bsl::to_u32(cap & MSR_IA32_MTRR_CAP_VCNT);
-        bsl::debug_v!("cap_vcnt={}\n", cap_vcnt);
+        
+        bsl::debug_v!("cap_vcnt={} phys_addr_bits={}\n", cap_vcnt, self.phys_addr_bits);
 
         self.add_vcnt_range(cap_vcnt, pas, sys);
 
