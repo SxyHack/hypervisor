@@ -1,3 +1,5 @@
+use core::cmp::min;
+
 const MTRR_MAX_RANGES: usize = 512;
 
 /// @brief defines the MSR_IA32_MTRR_CAPABILITIES
@@ -62,15 +64,17 @@ impl MtrrRangeT {
 /// view of the ranges as needed.
 #[derive(Debug, Copy, Clone)]
 pub struct MtrrT {
-    phys_addr_bits: bsl::SafeU64,
-    ranges: [MtrrRangeT; MTRR_MAX_RANGES],
-    ranges_count: usize,
+    pub phys_addr_bits: bsl::SafeU64,
+    pub phys_addr_end: bsl::SafeU64,
+    pub ranges: [MtrrRangeT; MTRR_MAX_RANGES],
+    pub ranges_count: usize,
 }
 
 impl MtrrT {
     pub const fn new() -> Self {
         Self {
             phys_addr_bits: bsl::SafeU64::new(0),
+            phys_addr_end: bsl::SafeU64::new(0),
             ranges: [MtrrRangeT::default(); MTRR_MAX_RANGES],
             ranges_count: 0,
         }
@@ -99,12 +103,36 @@ impl MtrrT {
         let msr = bsl::to_u32(MSR_IA32_MTRR_CAPABILITIES);
         let cap = sys.bf_intrinsic_op_rdmsr(msr);
         let cap_vcnt = bsl::to_u32(cap & MSR_IA32_MTRR_CAP_VCNT);
-        
-        bsl::debug_v!("cap_vcnt={} phys_addr_bits={}\n", cap_vcnt, self.phys_addr_bits);
+
+        bsl::debug_v!(
+            "cap_vcnt={} phys_addr_bits={}\n",
+            cap_vcnt,
+            self.phys_addr_bits
+        );
 
         self.add_vcnt_range(cap_vcnt, pas, sys);
 
         return bsl::errc_success;
+    }
+
+    /// <!-- description -->
+    /// 获取物理地址的内存类型
+    /// 
+    /// 参数表
+    /// - phys: 内存物理地址
+    /// 
+    /// 返回内存类型(usize)
+    pub fn get_memory_type(&self, phys: bsl::SafeU64) -> usize {
+        let mut ret = bsl::SafeU64::new(0);
+
+        for i in 0..self.ranges_count {
+            let range = self.ranges.get(i).unwrap();
+            if range.addr <= phys && phys < range.addr + range.size {
+                ret = range.memory_type;
+            }
+        }
+
+        ret.get() as usize
     }
 
     /// <!-- description -->
@@ -145,15 +173,18 @@ impl MtrrT {
                 memory_type
             );
 
-            if memory_type == bsl::to_u64(MEMORY_TYPE_WB) {
-                continue;
-            }
+            self.phys_addr_end = self.phys_addr_end.max(addr + size);
+
+            // if memory_type == bsl::to_u64(MEMORY_TYPE_WB) {
+            //     continue;
+            // }
 
             let ret = self.add_range(MtrrRangeT::new(addr, size, memory_type));
             if ret == bsl::errc_failure {
                 bsl::error!("MTRR add range failed, {}", bsl::here());
                 return ret;
             }
+
         }
 
         bsl::errc_success

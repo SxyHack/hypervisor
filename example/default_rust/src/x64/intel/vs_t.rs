@@ -202,8 +202,6 @@ impl VsT {
         let idx = syscall::BF_REG_T_ADDRESS_OF_MSR_BITMAPS;
         bsl::expects(sys.bf_vs_op_write(self.id(), idx, gs.msr_bitmap_phys));
 
-
-
         if syscall::BfSyscallT::is_vs_a_root_vs(self.id()) {
             bsl::expects(sys.bf_vs_op_init_as_root(self.id()));
         } else {

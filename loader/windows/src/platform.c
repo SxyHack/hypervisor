@@ -143,7 +143,7 @@ platform_alloc_contiguous(uint64_t const size) NOEXCEPT
 
     ret = MmAllocateContiguousMemory(size, addr);
     if (NULLPTR == ret) {
-        bferror("kmalloc failed");
+        bferror_x64("kmalloc failed", size);
         return NULLPTR;
     }
 

@@ -1,3 +1,5 @@
+use core::ops::AddAssign;
+
 /// @copyright
 /// Copyright (C) 2020 Assured Information Security, Inc.
 ///
@@ -44,7 +46,7 @@ pub fn gs_initialize(
         print_v!("{}", bsl::here());
         return bsl::errc_failure;
     }
-    
+
     bsl::print_v!("Allocated MSR Bitmap: {:#08X}\n", gs.msr_bitmap_phys);
 
     let ret = gs.mtrr.initialize(sys, intrinsic);
@@ -53,6 +55,40 @@ pub fn gs_initialize(
         return bsl::errc_failure;
     }
 
-    gs.ept.initialize(&gs.mtrr, sys)
-    // return bsl::errc_success;
+    let ret = gs.ept.initialize(sys);
+    if !ret.success() {
+        bsl::error!("{}", bsl::here());
+        return bsl::errc_failure;
+    }
+
+    build_ept_map(sys, gs)
+}
+
+fn build_ept_map(sys: &syscall::BfSyscallT, gs: &mut crate::GsT) -> bsl::ErrcType {
+    // bsl::discard(sys);
+    // bsl::discard(gs);
+
+    let page_2m = bsl::SafeU64::new(0x200000);
+    let mut cursor = bsl::SafeU64::new(0);
+    let mut count = 0;
+    while cursor < gs.mtrr.phys_addr_end {
+        let memory_type = gs.mtrr.get_memory_type(cursor);
+        let ret = gs.ept.alloc_2m_page(sys, cursor, memory_type);
+        if !ret.success() {
+            bsl::error!("alloc_2m_page failed, {}", bsl::here());
+            return bsl::errc_failure;
+        }
+
+        cursor += page_2m;
+        count += 1;
+    }
+
+    bsl::debug!(
+        "build ept map({}), {:#018x} == {:#018x}",
+        count,
+        cursor,
+        gs.mtrr.phys_addr_end
+    );
+
+    bsl::errc_success
 }

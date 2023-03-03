@@ -78,7 +78,7 @@ pub fn dispatch_fail(
     //   fault system works properly during testing.
     //
 
-    // alert!("this extension does not support handling fast fail events\n");
-    return sys.bf_vs_op_advance_ip_and_run_current();
-    // return bsl::errc_failure;
+    // return sys.bf_vs_op_advance_ip_and_run_current();
+    alert!("this extension does not support handling fast fail events\n");
+    return bsl::errc_failure;
 }
