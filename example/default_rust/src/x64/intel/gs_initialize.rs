@@ -1,4 +1,4 @@
-use core::ops::AddAssign;
+use crate::{map_2m_page, ExtentPageTable, mtrr_t::MtrrT};
 
 /// @copyright
 /// Copyright (C) 2020 Assured Information Security, Inc.
@@ -47,7 +47,7 @@ pub fn gs_initialize(
         return bsl::errc_failure;
     }
 
-    bsl::print_v!("Allocated MSR Bitmap: {:#08X}\n", gs.msr_bitmap_phys);
+    bsl::debug!("Allocated MSR Bitmap: {:#08X}\n", gs.msr_bitmap_phys);
 
     let ret = gs.mtrr.initialize(sys, intrinsic);
     if !ret.success() {
@@ -55,25 +55,41 @@ pub fn gs_initialize(
         return bsl::errc_failure;
     }
 
-    let ret = gs.ept.initialize(sys);
-    if !ret.success() {
-        bsl::error!("{}", bsl::here());
+    let virt = core::ptr::addr_of!(gs.mtrr);
+    bsl::debug!("mtrr={:#016X}\n", virt.addr());
+
+    let size = bsl::to_u64(core::mem::size_of::<ExtentPageTable>());
+    bsl::debug!("ept size: {:#06x}\n", size);
+    gs.ept = sys.bf_mem_op_alloc_huge(size, &mut gs.ept_phys);
+    bsl::debug!(
+        "ept addr: phys={:#018x} virt={:#018x}\n",
+        gs.ept_phys,
+        gs.ept.addr()
+    );
+    if core::ptr::null_mut() == gs.ept {
+        bsl::error!("allocated EPT failed, {}\n", bsl::here());
         return bsl::errc_failure;
     }
 
-    build_ept_map(sys, gs)
+    build_ept_map(sys, intrinsic, gs)
+    // bsl::errc_success
 }
 
-fn build_ept_map(sys: &syscall::BfSyscallT, gs: &mut crate::GsT) -> bsl::ErrcType {
+fn build_ept_map(
+    sys: &syscall::BfSyscallT,
+    intrinsic: &crate::IntrinsicT,
+    gs: &mut crate::GsT,
+) -> bsl::ErrcType {
     // bsl::discard(sys);
     // bsl::discard(gs);
 
     let page_2m = bsl::SafeU64::new(0x200000);
     let mut cursor = bsl::SafeU64::new(0);
     let mut count = 0;
-    while cursor < gs.mtrr.phys_addr_end {
+    while cursor < gs.mtrr.max_phys {
         let memory_type = gs.mtrr.get_memory_type(cursor);
-        let ret = gs.ept.alloc_2m_page(sys, cursor, memory_type);
+        let ept = unsafe { gs.ept.as_mut().unwrap() };
+        let ret = map_2m_page(sys, intrinsic, ept, cursor, memory_type);
         if !ret.success() {
             bsl::error!("alloc_2m_page failed, {}", bsl::here());
             return bsl::errc_failure;
@@ -84,11 +100,12 @@ fn build_ept_map(sys: &syscall::BfSyscallT, gs: &mut crate::GsT) -> bsl::ErrcTyp
     }
 
     bsl::debug!(
-        "build ept map({}), {:#018x} == {:#018x}",
+        "build ept map({:#06x}), {:#018x} == {:#018x}\n",
         count,
         cursor,
-        gs.mtrr.phys_addr_end
+        gs.mtrr.max_phys
     );
 
+    syscall::bf_debug_op_dump_huge_pool();
     bsl::errc_success
 }

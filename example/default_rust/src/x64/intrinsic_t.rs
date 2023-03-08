@@ -61,4 +61,17 @@ impl IntrinsicT {
             intrinsic_cpuid_impl(rax.data(), rbx.data(), rcx.data(), rdx.data());
         }
     }
+
+    /// 使用cpuid指令获取CPU物理地址的长度(以bit为单位)
+    pub fn phys_bits(&self) -> u64 {
+        let mut rax = bsl::to_u64(0x80000008u64);
+        let mut rbx = bsl::to_u64(0);
+        let mut rcx = bsl::to_u64(0);
+        let mut rdx = bsl::to_u64(0);
+
+        self.cpuid(&mut rax, &mut rbx, &mut rcx, &mut rdx);
+
+        let ret = rax & bsl::to_u64(0x000000FF);
+        ret.get()
+    }
 }

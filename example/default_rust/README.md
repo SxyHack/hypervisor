@@ -1,3 +1,9 @@
+### 踩到的坑
+#### 1. 不能使用 DEBUG (⭐⭐⭐⭐⭐)
+在 Debug 模式下, 调用IntrinsicT.cpuid会导致kernel模块触发FAST_FAIL事件.
+调试很久没有头绪, 最后换成Release就可以了
+
+
 ### 重建项目时, 需要删除Cargo.toml, Cargo.lock
 
 ### 

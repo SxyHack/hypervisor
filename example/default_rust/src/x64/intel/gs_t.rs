@@ -22,10 +22,14 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
+// #[path = "../mtrr.rs"]
+// #[doc(hidden)]
+// pub mod mtrr;
+// pub use mtrr::*;
+
 #[path = "../mtrr_t.rs"]
-#[doc(hidden)]
 pub mod mtrr_t;
-pub use mtrr_t::*;
+pub use mtrr_t::MtrrT;
 
 pub mod ept;
 pub use ept::*;
@@ -41,14 +45,16 @@ pub use ept::*;
 ///
 #[derive(Debug, Copy, Clone)]
 pub struct GsT {
-    /// @brief stores the MSR bitmap used by this vs_t
+    /// stores the MSR bitmap used by this vs_t
     pub msr_bitmap: *mut u8,
-    /// @brief stores the physical address of the MSR bitmap above
+    /// stores the physical address of the MSR bitmap above
     pub msr_bitmap_phys: bsl::SafeU64,
-    /// @brief stores the MTRR used by ept
+    /// stores the MTRR used by ept
     pub mtrr: MtrrT,
-    /// @brief stores the EPT
-    pub ept: ExtentPageTable, 
+    /// stores the EPT
+    pub ept: *mut ExtentPageTable, 
+    /// stores the physical address of EPT
+    pub ept_phys: bsl::SafeU64,
 }
 
 impl GsT {
@@ -60,7 +66,8 @@ impl GsT {
             msr_bitmap: core::ptr::null_mut(),
             msr_bitmap_phys: bsl::SafeU64::new(0),
             mtrr: MtrrT::new(),
-            ept: ExtentPageTable::new(),
+            ept: core::ptr::null_mut(),
+            ept_phys: bsl::SafeU64::new(0),
         }
     }
 }
