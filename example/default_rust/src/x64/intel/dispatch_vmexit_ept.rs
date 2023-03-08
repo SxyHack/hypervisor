@@ -29,6 +29,6 @@ pub fn dispatch_vmexit_ept_misconfig(
     bsl::discard(sys);
     bsl::discard(intrinsic);
     bsl::discard(vsid);
-
+    
     bsl::errc_success
 }

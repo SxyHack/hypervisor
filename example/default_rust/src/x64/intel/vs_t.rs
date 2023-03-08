@@ -1,3 +1,5 @@
+use crate::ept;
+
 /// @copyright
 /// Copyright (C) 2020 Assured Information Security, Inc.
 ///
@@ -153,7 +155,7 @@ impl VsT {
 
         let pin_ctls = bsl::SafeU64::default();
         let mut proc_ctls = bsl::SafeU64::default();
-        let exit_ctls = bsl::SafeU64::default();
+        let mut exit_ctls = bsl::SafeU64::default();
         let mut entry_ctls = bsl::SafeU64::default();
         let mut proc2_ctls = bsl::SafeU64::default();
 
@@ -166,6 +168,7 @@ impl VsT {
         let enable_ia32e_mode = bsl::SafeU64::new(0x00000200);
 
         entry_ctls |= enable_ia32e_mode;
+        exit_ctls |= enable_ia32e_mode;
 
         let enable_ept = bsl::SafeU64::new(0x00000002);
         let enable_vpid = bsl::SafeU64::new(0x00000020);
@@ -174,15 +177,14 @@ impl VsT {
         let enable_xsave = bsl::SafeU64::new(0x00100000);
         let enable_uwait = bsl::SafeU64::new(0x04000000);
 
-        proc2_ctls |= enable_vpid;
         proc2_ctls |= enable_rdtscp;
         proc2_ctls |= enable_invpcid;
         proc2_ctls |= enable_xsave;
         proc2_ctls |= enable_uwait;
+        // 支持EPT, 下面的必须要有
+        proc2_ctls |= enable_vpid;
         // proc2_ctls |= enable_ept;
-        
-        // let idx = syscall::BF_REG_T_EPT_POINTER;
-        // bsl::expects(sys.bf_vs_op_write(self.id(), idx, gs.ept.eptp()));
+
 
         let idx = syscall::BF_REG_T_PIN_BASED_VM_EXECUTION_CTLS;
         bsl::expects(sys.bf_vs_op_write(self.id(), idx, pin_ctls));
@@ -201,6 +203,12 @@ impl VsT {
 
         let idx = syscall::BF_REG_T_ADDRESS_OF_MSR_BITMAPS;
         bsl::expects(sys.bf_vs_op_write(self.id(), idx, gs.msr_bitmap_phys));
+
+        // EPT
+        let idx = syscall::BF_REG_T_EPT_POINTER;
+        let eptp = ept::eptp(gs);
+        bsl::debug!("ETPT: {:#08X}\n", eptp);
+        bsl::expects(sys.bf_vs_op_write(self.id(), idx, eptp));
 
         if syscall::BfSyscallT::is_vs_a_root_vs(self.id()) {
             bsl::expects(sys.bf_vs_op_init_as_root(self.id()));

@@ -71,8 +71,8 @@ pub fn gs_initialize(
         return bsl::errc_failure;
     }
 
-    build_ept_map(sys, intrinsic, gs)
-    // bsl::errc_success
+    // build_ept_map(sys, intrinsic, gs)
+    bsl::errc_success
 }
 
 fn build_ept_map(
@@ -84,6 +84,7 @@ fn build_ept_map(
     // bsl::discard(gs);
 
     let page_2m = bsl::SafeU64::new(0x200000);
+    let page_4k = syscall::HYPERVISOR_PAGE_SIZE;
     let mut cursor = bsl::SafeU64::new(0);
     let mut count = 0;
     while cursor < gs.mtrr.max_phys {
@@ -95,7 +96,7 @@ fn build_ept_map(
             return bsl::errc_failure;
         }
 
-        cursor += page_2m;
+        cursor += page_4k;
         count += 1;
     }
 

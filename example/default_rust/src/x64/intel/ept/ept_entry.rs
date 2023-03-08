@@ -77,3 +77,9 @@ pub struct EptEntryPt {
     /// stores the entries for this page table
     pub entries: [EptEntryT; EPT_ENTRY_COUNT],
 }
+
+
+pub struct EptPml4 {
+    pub pml4: [EptEntryT; EPT_ENTRY_COUNT],
+    pub pdpt: [EptEntryT; EPT_ENTRY_COUNT],
+}
