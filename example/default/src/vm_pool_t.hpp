@@ -110,7 +110,7 @@ namespace example
                 m_pool.at_if(mut_i)->initialize(gs, tls, mut_sys, intrinsic, bsl::to_u16(mut_i));
             }
 
-            bsl::debug() << "vm_pool initialized: " << m_pool.size();
+            bsl::debug() << "vm_pool initialized: " << m_pool.size() << bsl::endl;
 
             auto const root_vmid{this->get_vm(syscall::BF_ROOT_VMID)
                                      ->allocate(gs, tls, mut_sys, mut_page_pool, intrinsic)};
@@ -308,11 +308,11 @@ namespace example
         ///   @return Returns the system physical address of the second level
         ///     page tables used by the requested vm_t.
         ///
-        //[[nodiscard]] constexpr auto
-        //slpt_spa(bsl::safe_u16 const &vmid) const noexcept -> bsl::safe_u64
-        //{
-        //    return this->get_vm(vmid)->slpt_spa();
-        //}
+        [[nodiscard]] constexpr auto
+        eptp(bsl::safe_u16 const &vmid) const noexcept -> bsl::safe_u64
+        {
+            return this->get_vm(vmid)->eptp();
+        }
 
         /// <!-- description -->
         ///   @brief Maps memory into the requested vm_t using instructions

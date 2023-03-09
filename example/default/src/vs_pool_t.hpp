@@ -143,7 +143,8 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             bsl::safe_u16 const &vpid,
-            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
+            bsl::safe_u16 const &ppid,
+            bsl::safe_u64 const &eptp) noexcept -> bsl::safe_u16
         {
             /// NOTE:
             /// - Ask the microkernel to create a VS and return the ID of the
@@ -162,7 +163,7 @@ namespace example
             ///   which vs_t to allocate.
             ///
 
-            return this->get_vs(vsid)->allocate(gs, tls, mut_sys, intrinsic, vpid, ppid);
+            return this->get_vs(vsid)->allocate(gs, tls, mut_sys, intrinsic, vpid, ppid, eptp);
         }
 
         /// <!-- description -->

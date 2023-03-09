@@ -139,7 +139,8 @@ namespace example
             syscall::bf_syscall_t &mut_sys,
             intrinsic_t const &intrinsic,
             bsl::safe_u16 const &vpid,
-            bsl::safe_u16 const &ppid) noexcept -> bsl::safe_u16
+            bsl::safe_u16 const &ppid,
+            bsl::safe_u64 const &ept_spa) noexcept -> bsl::safe_u16
         {
             syscall::bf_reg_t mut_idx{};
 
@@ -154,6 +155,7 @@ namespace example
             bsl::discard(tls);
             bsl::discard(intrinsic);
 
+            // require VPID for use EPT
             constexpr auto vmcs_vpid_val{0x1_u64};
             constexpr auto vmcs_vpid_idx{syscall::bf_reg_t::bf_reg_t_virtual_processor_identifier};
             bsl::expects(mut_sys.bf_vs_op_write(this->id(), vmcs_vpid_idx, vmcs_vpid_val));
@@ -190,6 +192,9 @@ namespace example
             mut_proc2_ctls |= enable_xsave;
             mut_proc2_ctls |= enable_uwait;
 
+            constexpr auto enable_ept{0x00000002_u64};
+            mut_proc2_ctls |= enable_ept;
+
             mut_idx = syscall::bf_reg_t::bf_reg_t_pin_based_vm_execution_ctls;
             bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, mut_pin_ctls));
 
@@ -207,6 +212,12 @@ namespace example
 
             mut_idx = syscall::bf_reg_t::bf_reg_t_address_of_msr_bitmaps;
             bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, gs.msr_bitmap_phys));
+
+            constexpr auto eptp_fields{0x1E_u64};
+            bsl::safe_umx const eptp{ept_spa | eptp_fields};
+            mut_idx = syscall::bf_reg_t::bf_reg_t_ept_pointer;
+            bsl::expects(mut_sys.bf_vs_op_write(this->id(), mut_idx, eptp));
+            bsl::debug() << "setup eptp:" << bsl::hex(eptp) << bsl::endl;
 
             if (mut_sys.is_vs_a_root_vs(this->id())) {
                 bsl::expects(mut_sys.bf_vs_op_init_as_root(this->id()));

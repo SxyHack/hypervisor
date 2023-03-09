@@ -114,6 +114,10 @@ target_include_directories(extension_bin PRIVATE
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/allocated_status_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/pause.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/page_1g_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/page_2m_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/page_4k_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/map_page_flags.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_bootstrap.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_fail.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vm_pool_t.hpp
@@ -160,6 +164,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vs_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/pp_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/ept_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/second_level_page_table_helpers.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/l3e_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/l2e_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/l1e_t.hpp

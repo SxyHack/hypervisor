@@ -27,10 +27,13 @@
 
 #include <allocated_status_t.hpp>
 #include <bf_syscall_t.hpp>
+#include <ept_t.hpp>
 #include <gs_t.hpp>
 #include <intrinsic_t.hpp>
 #include <page_pool_t.hpp>
 #include <tls_t.hpp>
+#include <page_2m_t.hpp>
+#include <map_page_flags.hpp>
 
 #include <bsl/discard.hpp>
 #include <bsl/ensures.hpp>
@@ -52,6 +55,8 @@ namespace example
         allocated_status_t m_allocated{};
         /// @brief stores whether or not this vm_t is active.
         bsl::array<bool, HYPERVISOR_MAX_PPS.get()> m_active{};
+
+        extented_page_table_t m_ept{};
 
     public:
         /// <!-- description -->
@@ -145,16 +150,40 @@ namespace example
             bsl::discard(mut_page_pool);
             bsl::discard(intrinsic);
 
+            bsl::errc_type mut_ret{};
+
             bsl::expects(this->id() != syscall::BF_INVALID_ID);
             bsl::expects(allocated_status_t::deallocated == m_allocated);
 
-            bsl::debug() << "here:" << bsl::here() << "alloc EPT" << bsl::endl;
+            mut_ret = m_ept.initialize(tls, mut_page_pool, mut_sys);
+            if (bsl::unlikely(!mut_ret)) {
+                bsl::print<bsl::V>() << bsl::here();
+                return bsl::safe_u16::failure();
+            }
 
-            //auto const ret{m_emulated_mmio.allocate(gs, tls, mut_sys, mut_page_pool, intrinsic)};
-            //if (bsl::unlikely(!ret)) {
-            //    bsl::print<bsl::V>() << bsl::here();
-            //    return bsl::safe_u16::failure();
-            //}
+            constexpr auto max_gpa{bsl::to_u64(0x8000000000U)};
+            constexpr auto gpa_inc{bsl::to_idx(PAGE_2M_T_SIZE)};
+
+            if (mut_sys.is_vm_the_root_vm(this->id())) {
+                mut_page_pool.dump(tls);
+                for (bsl::safe_idx mut_i{}; mut_i < max_gpa; mut_i += gpa_inc) {
+                    auto const spa{bsl::to_u64(mut_i)};
+                    auto const gpa{bsl::to_u64(mut_i)};
+
+                    mut_ret = m_ept.map<l1e_t>(tls, mut_page_pool, gpa, spa, MAP_PAGE_RWE, false, mut_sys);
+                    if (bsl::unlikely(!mut_ret)) {
+                        bsl::print<bsl::V>() << bsl::here();
+                        return bsl::safe_u16::failure();
+                    }
+                    bsl::touch();
+                }
+
+                mut_page_pool.dump(tls);
+                bsl::debug() << "mapped ept_phys:" << bsl::hex(m_ept.spa()) << bsl::endl;
+            }
+            else {
+                bsl::touch();
+            }
 
             m_allocated = allocated_status_t::allocated;
 
@@ -325,11 +354,11 @@ namespace example
         ///   @return Returns the system physical address of the second level
         ///     page tables used by this vm_t.
         ///
-        //[[nodiscard]] constexpr auto
-        //slpt_spa() const noexcept -> bsl::safe_u64
-        //{
-        //    return m_emulated_mmio.slpt_spa();
-        //}
+        [[nodiscard]] constexpr auto
+        eptp() const noexcept -> bsl::safe_u64
+        {
+            return m_ept.spa();
+        }
 
         /// <!-- description -->
         ///   @brief Maps memory into this vm_t using instructions from the

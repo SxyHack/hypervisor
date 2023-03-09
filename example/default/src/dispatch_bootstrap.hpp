@@ -94,7 +94,6 @@ namespace example
 
         constexpr auto vmid{syscall::BF_ROOT_VMID};
 
-        mut_pp_pool.allocate(gs, mut_tls, mut_sys, intrinsic, mut_page_pool, ppid);
 
         /// NOTE:
         /// - The VP in this simple example does nothing, but we still need
@@ -113,11 +112,14 @@ namespace example
             return bsl::errc_failure;
         }
 
-        auto const vsid{mut_vs_pool.allocate(gs, mut_tls, mut_sys, intrinsic, vpid, ppid)};
+        auto const eptp{mut_vm_pool.eptp(vmid)};
+        auto const vsid{mut_vs_pool.allocate(gs, mut_tls, mut_sys, intrinsic, vpid, ppid, eptp)};
         if (bsl::unlikely(vsid.is_invalid())) {
             bsl::print<bsl::V>() << bsl::here();
             return bsl::errc_failure;
         }
+
+        mut_pp_pool.allocate(gs, mut_tls, mut_sys, intrinsic, mut_page_pool, ppid);
 
         /// NOTE:
         /// - Run the newly created VP on behalf of the root VM using the
