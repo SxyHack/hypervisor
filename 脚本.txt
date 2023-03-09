@@ -1,11 +1,12 @@
 cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DBSL_DEBUG_LEVEL=bsl::V
-
 cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE
 
 使用 Rust 语言开发
 ```
-cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=D:/Code/Cpp/VT/hypervisor/example/default_rust -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE -DHYPERVISOR_MK_HUGE_POOL_SIZE=0x2000000
+cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=D:/Code/Cpp/VT/hypervisor/example/default_rust -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE -DHYPERVISOR_MK_HUGE_POOL_SIZE=0x2000000 -DHYPERVISOR_MAX_HUGE_ALLOCS=1024
 ```
+
+HYPERVISOR_MAX_HUGE_ALLOCS
 
 ### HOME
 ```
@@ -14,8 +15,4 @@ cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/V/hypervisor/bsl -DHYPERVISOR
 ```
 
 
-### 安装环境
-1. 安装 2019(必须)
-2. 安装 Clang 编译器，VS单个组建搜索clang
-2. 安装 WDK (ver2004)[https://go.microsoft.com/fwlink/?linkid=2128854]
-3. 安装 Spectre 漏洞库(MSVC v142 -VS2019 C++ x64/x86 Spectre 缓解库(最新) )
+

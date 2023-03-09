@@ -32,6 +32,9 @@
 #include <tls_t.hpp>
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
+#include <pp_pool_t.hpp>
+#include <vm_pool_t.hpp>
+#include <page_pool_t.hpp>
 
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
@@ -63,10 +66,15 @@ namespace example
         tls_t &mut_tls,
         syscall::bf_syscall_t &mut_sys,
         intrinsic_t const &intrinsic,
+        page_pool_t &mut_page_pool,
+        pp_pool_t &mut_pp_pool,
+        vm_pool_t &mut_vm_pool,
         vp_pool_t &mut_vp_pool,
         vs_pool_t &mut_vs_pool,
         bsl::safe_u16 const &ppid) noexcept -> bsl::errc_type
     {
+        bsl::discard(mut_vm_pool);
+
         bsl::expects(ppid.is_valid_and_checked());
         bsl::expects(ppid != syscall::BF_INVALID_ID);
 
@@ -85,6 +93,8 @@ namespace example
         ///
 
         constexpr auto vmid{syscall::BF_ROOT_VMID};
+
+        mut_pp_pool.allocate(gs, mut_tls, mut_sys, intrinsic, mut_page_pool, ppid);
 
         /// NOTE:
         /// - The VP in this simple example does nothing, but we still need

@@ -147,6 +147,8 @@ platform_alloc_contiguous(uint64_t const size) NOEXCEPT
         return NULLPTR;
     }
 
+    bfdebug_ptr("MmAllocateContiguousMemory:", ret);
+
     RtlFillMemory(ret, size, 0);
     return ret;
 }

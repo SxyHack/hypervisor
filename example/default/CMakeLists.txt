@@ -113,11 +113,20 @@ target_include_directories(extension_bin PRIVATE
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/allocated_status_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/pause.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_bootstrap.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/dispatch_fail.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/vm_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vp_pool_t.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/vp_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/pp_pool_t.hpp
     ${CMAKE_CURRENT_LIST_DIR}/src/vs_pool_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/vp_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/page_pool_helpers.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/page_pool_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/spinlock_helpers.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/spinlock_t.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/lock_guard_helpers.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/lock_guard_t.hpp
 )
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
@@ -125,6 +134,7 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
         ${CMAKE_CURRENT_LIST_DIR}/src/x64/dispatch_vmexit_cpuid.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/x64/intrinsic_cpuid_impl.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/x64/intrinsic_t.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/x64/vm_t.hpp
     )
 
     if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD")
@@ -148,6 +158,12 @@ if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STRE
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/tls_initialize.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/tls_t.hpp
             ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/vs_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/pp_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/ept_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/l3e_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/l2e_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/l1e_t.hpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/x64/intel/l0e_t.hpp
         )
     endif()
 endif()
@@ -165,6 +181,7 @@ example_target_source(extension_bin src/main.cpp ${HEADERS})
 
 if(HYPERVISOR_TARGET_ARCH STREQUAL "AuthenticAMD" OR HYPERVISOR_TARGET_ARCH STREQUAL "GenuineIntel")
     example_target_source(extension_bin src/x64/intrinsic_cpuid_impl.S ${HEADERS})
+    example_target_source(extension_bin src/x64/pause.S ${HEADERS})
 endif()
 
 # ------------------------------------------------------------------------------

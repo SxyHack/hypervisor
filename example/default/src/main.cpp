@@ -31,6 +31,8 @@
 #include <gs_t.hpp>
 #include <intrinsic_t.hpp>
 #include <tls_t.hpp>
+#include <vm_pool_t.hpp>
+#include <pp_pool_t.hpp>
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
 
@@ -45,7 +47,7 @@ namespace example
     /// NOTE:
     /// - This is where we store all of our global and thread local variables.
     ///   All of the variables are marked as static to ensure they are not
-    ///   visable to the rest of the code.
+    ///   visiable to the rest of the code.
     /// - All global and thread local variables must be passed around from
     ///   function to function as needed. This ensures that constexpr unit
     ///   tests work properly as the rest of the code never relies on global
@@ -81,7 +83,16 @@ namespace example
     /// @brief stores the intrinsic_t that this code will use
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit intrinsic_t g_mut_intrinsic{};
+    /// @brief stores the page_pool_t that this code will use
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit page_pool_t g_mut_page_pool{};
 
+    /// @brief stores the pool of PPs that MicroV will use
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit pp_pool_t g_mut_pp_pool{};
+    /// @brief stores the pool of VMs that MicroV will use
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    constinit vm_pool_t g_mut_vm_pool{};
     /// @brief stores the pool of VPs that we will use
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     constinit vp_pool_t g_mut_vp_pool{};
@@ -118,6 +129,9 @@ namespace example
             g_mut_tls,                        // --
             g_mut_sys,                        // --
             g_mut_intrinsic,                  // --
+            g_mut_page_pool,                  // --
+            g_mut_pp_pool,                    // --
+            g_mut_vm_pool,                    // --
             g_mut_vp_pool,                    // --
             g_mut_vs_pool,                    // --
             bsl::to_u16(ppid))};
@@ -194,8 +208,7 @@ namespace example
     ///   @param exit_reason the exit reason associated with the VMExit
     ///
     extern "C" void
-    vmexit_entry(
-        bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const exit_reason) noexcept
+    vmexit_entry(bsl::safe_u16::value_type const vsid, bsl::safe_u64::value_type const exit_reason) noexcept
     {
         /// NOTE:
         /// - Call into the vmexit handler. This entry point serves as a
@@ -266,6 +279,10 @@ namespace example
             bsl::print<bsl::V>() << bsl::here();
             return syscall::bf_control_op_exit();
         }
+
+        g_mut_pp_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_intrinsic);
+
+        g_mut_vm_pool.initialize(g_mut_gs, g_mut_tls, g_mut_sys, g_mut_page_pool, g_mut_intrinsic);
 
         /// NOTE:
         /// - Initialize the vp_pool_t. This will give all of our vp_t's

@@ -22,45 +22,20 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
-#ifndef TLS_INITIALIZE_HPP
-#define TLS_INITIALIZE_HPP
+#ifndef SPINLOCK_HELPERS_HPP
+#define SPINLOCK_HELPERS_HPP
 
-#include <bf_syscall_t.hpp>
-#include <intrinsic_t.hpp>
-#include <tls_t.hpp>
+#include <pause.hpp>
 
-#include <bsl/discard.hpp>
-#include <bsl/errc_type.hpp>
-
-namespace example
+namespace helpers
 {
     /// <!-- description -->
-    ///   @brief Initializes the Thread Local Storage (TLS).
+    ///   @brief Yields the PP
     ///
-    /// <!-- inputs/outputs -->
-    ///   @param mut_tls the tls_t to use
-    ///   @param sys the bf_syscall_t to use
-    ///   @param intrinsic the intrinsic_t to use
-    ///   @return Returns bsl::errc_success on success, bsl::errc_failure
-    ///     and friends otherwise
-    ///
-    [[nodiscard]] constexpr auto
-    tls_initialize(tls_t &mut_tls, syscall::bf_syscall_t const &sys, intrinsic_t const &intrinsic) noexcept -> bsl::errc_type
+    constexpr void
+    yield() noexcept
     {
-        bsl::discard(intrinsic);
-
-        mut_tls.ppid = sys.bf_tls_ppid();
-        mut_tls.online_pps = sys.bf_tls_online_pps();
-
-        mut_tls.active_vmid = syscall::BF_INVALID_ID;
-        mut_tls.active_vpid = syscall::BF_INVALID_ID;
-        mut_tls.active_vsid = syscall::BF_INVALID_ID;
-
-        mut_tls.parent_vmid = syscall::BF_INVALID_ID;
-        mut_tls.parent_vpid = syscall::BF_INVALID_ID;
-        mut_tls.parent_vsid = syscall::BF_INVALID_ID;
-
-        return bsl::errc_success;
+        example::pause();
     }
 }
 
