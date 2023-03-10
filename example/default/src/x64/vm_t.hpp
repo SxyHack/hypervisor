@@ -165,7 +165,10 @@ namespace example
             constexpr auto gpa_inc{bsl::to_idx(PAGE_2M_T_SIZE)};
 
             if (mut_sys.is_vm_the_root_vm(this->id())) {
-                mut_page_pool.dump(tls);
+                bsl::debug() << "vm "                                           // --
+                             << bsl::grn << bsl::hex(this->id()) << bsl::rst    // --
+                             << " was created"                                  // --
+                             << bsl::endl;                                      // --
                 for (bsl::safe_idx mut_i{}; mut_i < max_gpa; mut_i += gpa_inc) {
                     auto const spa{bsl::to_u64(mut_i)};
                     auto const gpa{bsl::to_u64(mut_i)};
@@ -186,18 +189,6 @@ namespace example
             }
 
             m_allocated = allocated_status_t::allocated;
-
-            if (!mut_sys.is_vm_the_root_vm(this->id())) {
-                bsl::debug<bsl::V>()                                   // --
-                    << "vm "                                           // --
-                    << bsl::grn << bsl::hex(this->id()) << bsl::rst    // --
-                    << " was created"                                  // --
-                    << bsl::endl;                                      // --
-            }
-            else {
-                bsl::touch();
-            }
-
             return this->id();
         }
 

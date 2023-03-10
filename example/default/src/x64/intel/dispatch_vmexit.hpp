@@ -31,8 +31,11 @@
 #include <dispatch_vmexit_nmi.hpp>
 #include <dispatch_vmexit_nmi_window.hpp>
 #include <gs_t.hpp>
-#include <intrinsic_t.hpp>
 #include <tls_t.hpp>
+#include <intrinsic_t.hpp>
+#include <page_pool_t.hpp>
+#include <pp_pool_t.hpp>
+#include <vm_pool_t.hpp>
 #include <vp_pool_t.hpp>
 #include <vs_pool_t.hpp>
 
@@ -52,8 +55,8 @@ namespace example
     ///   @param tls the tls_t to use
     ///   @param mut_sys the bf_syscall_t to use
     ///   @param intrinsic the intrinsic_t to use
-    ///   @param vp_pool the vp_pool_t to use
-    ///   @param vs_pool the vs_pool_t to use
+    ///   @param mut_vp_pool the vp_pool_t to use
+    ///   @param mut_vs_pool the vs_pool_t to use
     ///   @param vsid the ID of the VS that generated the VMExit
     ///   @param exit_reason the exit reason associated with the VMExit
     ///   @return Returns bsl::errc_success on success, bsl::errc_failure
@@ -65,8 +68,11 @@ namespace example
         tls_t const &tls,
         syscall::bf_syscall_t &mut_sys,
         intrinsic_t const &intrinsic,
-        vp_pool_t const &vp_pool,
-        vs_pool_t const &vs_pool,
+        page_pool_t &mut_page_pool,
+        pp_pool_t &mut_pp_pool,
+        vm_pool_t &mut_vm_pool,
+        vp_pool_t &mut_vp_pool,
+        vs_pool_t &mut_vs_pool,
         bsl::safe_u16 const &vsid,
         bsl::safe_u64 const &exit_reason) noexcept -> bsl::errc_type
     {
@@ -74,8 +80,11 @@ namespace example
         constexpr auto exit_reason_nmi_window{0x8_u64};
         constexpr auto exit_reason_cpuid{0xA_u64};
 
-        bsl::discard(vp_pool);
-        bsl::discard(vs_pool);
+        bsl::discard(mut_vp_pool);
+        bsl::discard(mut_vs_pool);
+        bsl::discard(mut_vm_pool);
+        bsl::discard(mut_pp_pool);
+        bsl::discard(mut_page_pool);
 
         switch (exit_reason.get()) {
             case exit_reason_nmi.get(): {

@@ -1,7 +1,12 @@
 cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DBSL_DEBUG_LEVEL=bsl::V
 cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE
 
-使用 Rust 语言开发
+cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=D:/Code/Cpp/VT/hypervisor/example/default -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE
+
+
+## Rust 
+Rust 的代码缺失太多, 后面有兴趣再学习, 先搞定C++.
+### 公司
 ```
 cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=D:/Code/Cpp/VT/hypervisor/example/default_rust -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE -DHYPERVISOR_MK_HUGE_POOL_SIZE=0x2000000 -DHYPERVISOR_MAX_HUGE_ALLOCS=1024
 ```

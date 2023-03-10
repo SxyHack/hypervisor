@@ -222,6 +222,9 @@ namespace example
             g_mut_tls,                     // --
             g_mut_sys,                     // --
             g_mut_intrinsic,               // --
+            g_mut_page_pool,
+            g_mut_pp_pool,
+            g_mut_vm_pool,
             g_mut_vp_pool,                 // --
             g_mut_vs_pool,                 // --
             bsl::to_u16(vsid),             // --
