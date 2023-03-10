@@ -139,6 +139,7 @@ endforeach(LIBRARY)
 unset(WDK_LIBRARIES)
 
 macro(__wdk_set_common_properties)
+    message(STATUS "WDK_COMPILE_FLAGS:" ${WDK_COMPILE_FLAGS})
     if(WDK_EXCEPTIONS)
         list(REMOVE_ITEM WDK_COMPILE_FLAGS "/kernel")
     endif()
@@ -161,6 +162,7 @@ macro(__wdk_set_common_properties)
     target_include_directories(${_target} SYSTEM PRIVATE
         "${WDK_ROOT}/Include/${WDK_INC_VERSION}/shared"
         "${WDK_ROOT}/Include/${WDK_INC_VERSION}/km"
+        "${WDK_ROOT}/Include/${WDK_INC_VERSION}/km/crt"
         "${WDK_ROOT}/Include/${WDK_INC_VERSION}/ucrt"
         )
 
@@ -179,6 +181,11 @@ macro(__wdk_set_common_properties)
         target_include_directories(${_target} SYSTEM PRIVATE "${WDK_ROOT}/Include/wdf/kmdf/${WDK_KMDF}")
     endif()
 endmacro()
+
+function(wdk_add_executable _target) 
+    add_executable(${_target})
+    __wdk_set_common_properties()
+endfunction()
 
 function(wdk_add_driver _target)
     cmake_parse_arguments(WDK "STL;EXCEPTIONS" "KMDF;WINVER;NTDDI_VERSION" "" ${ARGN})

@@ -22,6 +22,11 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 /// SOFTWARE.
 
+//#ifdef __clang__
+//#pragma clang diagnostic ignored "-Wreserved-id-macro"
+//#pragma clang diagnostic ignored "-Wundef"
+//#endif
+
 #include <bf_control_ops.hpp>
 #include <bf_syscall_t.hpp>
 #include <dispatch_bootstrap.hpp>
@@ -41,6 +46,9 @@
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
 #include <bsl/unlikely.hpp>
+
+//#include <wdm.h>
+
 
 namespace example
 {
