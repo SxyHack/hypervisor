@@ -5,10 +5,10 @@ cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISO
 
 
 ## Rust 
-Rust �Ĵ���ȱʧ̫��, ��������Ȥ��ѧϰ, �ȸ㶨C++.
-### ��˾
+Rust �Ĵ���ȱʧ̫��, ��������Ȥ��ѧϰ, �ȸ㶨C++.
+### ��˾
 ```
-cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=D:/Code/Cpp/VT/hypervisor/example/default_rust -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE -DHYPERVISOR_MK_HUGE_POOL_SIZE=0x2000000 -DHYPERVISOR_MAX_HUGE_ALLOCS=1024
+cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/VT/hypervisor/bsl -DHYPERVISOR_EXTENSIONS_DIR=D:/Code/Cpp/VT/hypervisor/example/default_rust -DBSL_DEBUG_LEVEL=bsl::V -DCMAKE_BUILD_TYPE=RELEASE -DHYPERVISOR_MK_HUGE_POOL_SIZE=0x2000000
 ```
 
 HYPERVISOR_MAX_HUGE_ALLOCS
@@ -20,4 +20,11 @@ cmake .. -DFETCHCONTENT_SOURCE_DIR_BSL=D:/Code/Cpp/V/hypervisor/bsl -DHYPERVISOR
 ```
 
 
+### 暂停探索
+该项目唯一的亮点在于, 动态加载ELF, 但是针对Linux. 这个可以参考
+各种需要的功能都要自己写, 耗时太久了.
+而且项目的工程师已经停更好久了, 据说是进入微软工作. 
 
+先去探索HyperDbg, 这个项目比较新, 很多功能都是写好了.
+
+用来达成自己的目标.

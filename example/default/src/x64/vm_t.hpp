@@ -40,6 +40,7 @@
 #include <bsl/expects.hpp>
 #include <bsl/safe_integral.hpp>
 
+
 namespace example
 {
     /// @class example::vm_t
@@ -182,7 +183,15 @@ namespace example
                 }
 
                 mut_page_pool.dump(tls);
-                bsl::debug() << "mapped ept_phys:" << bsl::hex(m_ept.spa()) << bsl::endl;
+
+                // for test
+                bsl::debug() << "create test hook:" << bsl::hex(m_ept.spa()) << bsl::endl;
+                auto const mon_gpa{bsl::to_u64(0x100000)};
+                mut_ret = m_ept.map<l1e_t>(tls, mut_page_pool, mon_gpa, mon_gpa, MAP_PAGE_RE, true, mut_sys);
+                if (bsl::unlikely(!mut_ret)) {
+                    bsl::print<bsl::V>() << bsl::here();
+                    return bsl::safe_u16::failure();
+                }
             }
             else {
                 bsl::touch();
